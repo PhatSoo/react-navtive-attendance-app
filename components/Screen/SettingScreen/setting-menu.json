@@ -1,0 +1,22 @@
+[
+    {
+        "title": "Thông tin cá nhân",
+        "icon": "user",
+        "onclick": ""
+    },
+    {
+        "title": "Cài đặt bảo mật",
+        "icon": "lock",
+        "onclick": ""
+    },
+    {
+        "title": "Cài đặt thông báo",
+        "icon": "bell",
+        "onclick": ""
+    },
+    {
+        "title": "Trợ giúp & Hỗ trợ",
+        "icon": "info-circle",
+        "onclick": ""
+    }
+]
