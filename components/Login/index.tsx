@@ -1,5 +1,4 @@
 import React, {useEffect, useState} from 'react';
-import {API, PORT} from '@env';
 import {
   BackHandler,
   Image,
@@ -13,9 +12,11 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
-import styles from './styles';
+import {styles} from './styles';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import axios from 'axios';
+import {user_login} from '../../api/users';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {clearToken} from '../../utils';
 
 const Login = ({navigation}: any) => {
   const [email, setEmail] = useState('');
@@ -24,6 +25,11 @@ const Login = ({navigation}: any) => {
   const [checkEmail, isCheckEmail] = useState({status: true, error: ''});
   const [checkPass, isCheckPass] = useState({status: true, error: ''});
   const [exitApp, setExitApp] = useState(false);
+  const [loginFailed, setLoginFailed] = useState('');
+
+  useEffect(() => {
+    clearToken();
+  }, []);
 
   useEffect(() => {
     const backAction = () => {
@@ -51,7 +57,7 @@ const Login = ({navigation}: any) => {
     return () => backHandler.remove();
   }, [exitApp]);
 
-  const handleLogin = async () => {
+  const handleLogin = () => {
     let formData = {
       email,
       password,
@@ -105,13 +111,14 @@ const Login = ({navigation}: any) => {
     }
 
     if (isEmailValid && isPasswordValid) {
-      try {
-        await axios
-          .post(`${API}:${PORT}/api/login/`, formData)
-          .then(() => navigation.navigate('Screen'));
-      } catch (error: any) {
-        console.error(error.response.data.message);
-      }
+      user_login(formData).then((result: any) => {
+        if (result?.data.success) {
+          AsyncStorage.setItem('AccessToken', result.data.token);
+          navigation.replace('Screen');
+        } else {
+          setLoginFailed(result?.data.message);
+        }
+      });
     }
   };
 
@@ -164,6 +171,7 @@ const Login = ({navigation}: any) => {
             ''
           )}
         </View>
+        <Text style={styles.textDanger}>{loginFailed}</Text>
 
         <View style={styles.row}>
           <Text style={styles.rowText}>Don't have an account? </Text>

@@ -2,7 +2,7 @@ import {Dimensions, StyleSheet} from 'react-native';
 
 const heightScreen = Dimensions.get('screen').height;
 
-const styles = StyleSheet.create({
+export const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
   },
@@ -13,28 +13,34 @@ const styles = StyleSheet.create({
   },
   top: {
     height: (heightScreen * 2) / 3,
-    padding: 10,
+    padding: 20,
   },
   bottom: {
     flexGrow: 1,
-    backgroundColor: 'green',
+    // backgroundColor: 'green',
     padding: 10,
+    alignItems: 'center',
   },
   camera: {
     flexGrow: 1,
   },
-  bound: ({width, height, x, y}) => {
-    return {
-      position: 'absolute',
-      top: y,
-      left: x,
-      height,
-      width,
-      borderWidth: 5,
-      borderColor: 'red',
-      zIndex: 300,
-    };
+  anim: {
+    width: 50,
+    height: 50,
+  },
+  text: {
+    color: '#000',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  buttonGroup: {
+    flexDirection: 'row',
+  },
+  button: {
+    marginTop: 50,
+    padding: 20,
+    backgroundColor: '#3E64FF',
+    borderRadius: 20,
+    width: '40%',
   },
 });
-
-export default styles;

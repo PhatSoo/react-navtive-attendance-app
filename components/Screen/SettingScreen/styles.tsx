@@ -1,6 +1,6 @@
 import {StyleSheet} from 'react-native';
 
-const styles = StyleSheet.create({
+export const styles = StyleSheet.create({
   container: {
     height: '100%',
     alignItems: 'center',
@@ -114,9 +114,7 @@ const styles = StyleSheet.create({
   input: {
     backgroundColor: '#eee',
     width: '55%',
-    fontSize: 20,
+    fontSize: 15,
     marginLeft: 10,
   },
 });
-
-export default styles;

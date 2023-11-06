@@ -1,58 +1,196 @@
 import React, {useRef, useState} from 'react';
-import {Text, View} from 'react-native';
+import {ActivityIndicator, Text, TouchableOpacity, View} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import styles from './styles';
+import {styles} from './styles';
 import {RNCamera} from 'react-native-camera';
+import FaceSDK, {
+  ImageType,
+  MatchFacesImage,
+  MatchFacesRequest,
+  MatchFacesResponse,
+} from '@regulaforensics/react-native-face-api';
 
-const Attendance = () => {
-  const [type, setType] = useState(RNCamera.Constants.Type.front);
-  const [box, setBox] = useState(null);
+import {firstImageBitmapAsBase64String} from './img';
+import LottieView from 'lottie-react-native';
+
+// interface BoxState {
+//   boxes: {
+//     width: any;
+//     height: any;
+//     x: any;
+//     y: any;
+//     yawAngle: any;
+//     rollAngle: any;
+//   };
+// }
+
+// Draw a box when face detected
+// const bound = ({
+//   width,
+//   height,
+//   x,
+//   y,
+// }: {
+//   width: number;
+//   height: number;
+//   x: number;
+//   y: number;
+// }): ViewStyle => {
+//   return {
+//     position: 'absolute',
+//     top: y,
+//     left: x,
+//     height,
+//     width,
+//     borderWidth: 5,
+//     borderColor: 'red',
+//     zIndex: 300,
+//   };
+// };
+
+const checkRecognize = (faceCapture: string) => {
+  return new Promise((resolve, reject) => {
+    const firstImage = new MatchFacesImage();
+    firstImage.imageType = ImageType.PRINTED;
+    firstImage.bitmap = firstImageBitmapAsBase64String;
+
+    const secondImage = new MatchFacesImage();
+    secondImage.imageType = ImageType.PRINTED;
+    secondImage.bitmap = faceCapture;
+
+    const request = new MatchFacesRequest();
+    request.images = [firstImage, secondImage];
+
+    FaceSDK.matchFaces(
+      JSON.stringify(request),
+      matchFacesResponse => {
+        const response = MatchFacesResponse.fromJson(
+          JSON.parse(matchFacesResponse),
+        );
+        resolve(response);
+      },
+      e => {
+        reject(e);
+      },
+    );
+  });
+};
+
+const Attendance = ({navigation}: any) => {
+  // const res = async () => {
+  //   const asd = await checkRecognize('asd');
+  //   console.log('====================================');
+  //   console.log(asd);
+  //   console.log('====================================');
+  // };
+  // res();
+  const type = RNCamera.Constants.Type.front;
+  // const [box, setBox] = useState<BoxState | null>(null);
   const cameraRef = useRef(null);
-
-  const handleFace = ({faces}) => {
-    console.log('====================================');
-    console.log(faces);
-    console.log('====================================');
-
-    if (faces[0]) {
-      setBox({
-        boxes: {
-          width: faces[0].bounds.size.width,
-          height: faces[0].bounds.size.height,
-          x: faces[0].bounds.origin.x,
-          y: faces[0].bounds.origin.y,
-          yawAngle: faces[0].yawAngle,
-          rollAngle: faces[0].rollAngle,
-        },
-      });
-    } else {
-      setBox(null);
+  const [loading, setLoading] = useState(true);
+  const [isCheckInOK, setIsCheckInOK] = useState(false);
+  const [isTakingPicture, setIsTakingPicture] = useState(false);
+  const handleFace = async ({faces}: any) => {
+    if (faces.length > 0 && !isTakingPicture) {
+      setIsTakingPicture(true);
+      // setBox({
+      //   boxes: {
+      //     width: faces[0].bounds.size.width,
+      //     height: faces[0].bounds.size.height,
+      //     x: faces[0].bounds.origin.x,
+      //     y: faces[0].bounds.origin.y,
+      //     yawAngle: faces[0].yawAngle,
+      //     rollAngle: faces[0].rollAngle,
+      //   },
+      // });
+      if (cameraRef.current) {
+        const options = {
+          pauseAfterCapture: true,
+          base64: true,
+          doNotSave: true,
+          quality: 0.5,
+        };
+        try {
+          const data = await cameraRef.current?.takePictureAsync(options);
+          const base64 = data.base64;
+          const res = await checkRecognize(base64);
+          if (res.exception === null) {
+            setLoading(false);
+            if (res.results[0].similarity > 0.9) {
+              setIsCheckInOK(true);
+            }
+          }
+        } catch (error) {
+          console.error('Error taking picture:', error);
+        } finally {
+          setIsTakingPicture(false);
+        }
+      }
     }
+    // else {
+    //   setBox(null);
+    // }
+    // }
   };
-
   return (
     <LinearGradient colors={['#ECFCFF', '#B2FCFF']} style={styles.wrapper}>
       <View style={styles.container}>
         <View style={styles.top}>
           <RNCamera
+            ref={cameraRef}
             type={type}
             captureAudio={false}
             style={styles.camera}
             onFacesDetected={handleFace}
           />
-          {box && (
+          {/* {box && (
             <View
-              style={styles.bound({
+              style={bound({
                 width: box.boxes.width,
                 height: box.boxes.height,
                 x: box.boxes.x,
                 y: box.boxes.y,
               })}
             />
-          )}
+          )} */}
         </View>
         <View style={styles.bottom}>
-          <Text>Bottom content</Text>
+          {loading ? (
+            <>
+              <ActivityIndicator size={'large'} />
+              <Text style={styles.text}>Đang xử lý</Text>
+            </>
+          ) : isCheckInOK ? (
+            <>
+              <LottieView
+                source={require('../../../assets/animation/load-success.json')}
+                loop
+                autoPlay
+                style={styles.anim}
+              />
+              <Text style={styles.text}>Hoàn thành</Text>
+            </>
+          ) : (
+            <>
+              <LottieView
+                source={require('../../../assets/animation/load-failed.json')}
+                loop
+                autoPlay
+                style={styles.anim}
+              />
+              <Text style={styles.text}>Thất bại</Text>
+            </>
+          )}
+          <View style={styles.buttonGroup}>
+            <TouchableOpacity style={[styles.button, {marginRight: 20}]}>
+              <Text style={styles.text}>Đăng ký ảnh</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => navigation.goBack()}>
+              <Text style={styles.text}>Thoát</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     </LinearGradient>

@@ -1,30 +1,56 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {View, Text, TouchableOpacity, Image} from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-import styles from './styles';
+import {styles} from './styles';
 import LinearGradient from 'react-native-linear-gradient';
+import {get_info} from '../../../api/users';
+import {API, AVATAR_PATH} from '@env';
 
 const HomeScreen = ({navigation}: any) => {
-  const employeeInfo = {
+  const [userInfo, setUserInfo] = useState({
     name: 'Nguyễn Văn A',
-    position: 'Nhân viên văn phòng',
+    roleId: {
+      typeName: 'Nhân viên văn phòng',
+    },
     isPartTime: false,
-    image: require('../../../assets/img/avatar.png'),
-  };
+    image: '',
+  });
+  const [selectedImage, setSelectedImage] = useState('');
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await get_info();
+      if (res?.data.success) {
+        setUserInfo(res.data.data);
+        if (userInfo && userInfo.image) {
+          const imagePath = API + '/' + AVATAR_PATH + '/' + userInfo.image;
+          setSelectedImage(imagePath);
+        }
+      }
+    };
+    fetchData();
+  }, [userInfo]);
 
   return (
     <LinearGradient colors={['#ECFCFF', '#B2FCFF']} style={styles.container}>
       <View style={styles.infoContainer}>
         <View style={styles.textContainer}>
-          <Text style={styles.infoText}>{employeeInfo.name}</Text>
+          <Text style={styles.infoText}>{userInfo.name}</Text>
           <Text style={styles.positionText}>
             Chức vụ:{' '}
-            <Text style={styles.infoText}> {employeeInfo.position}</Text>
+            <Text style={styles.infoText}> {userInfo.roleId.typeName}</Text>
           </Text>
         </View>
         <View>
-          <Image source={employeeInfo.image} style={styles.avatar} />
+          <Image
+            source={
+              selectedImage
+                ? {uri: selectedImage}
+                : require('../../../assets/img/avatar.png')
+            }
+            style={styles.avatar}
+          />
         </View>
       </View>
 
@@ -41,8 +67,10 @@ const HomeScreen = ({navigation}: any) => {
           <Icon name="calendar" size={30} color="#000" />
           <Text style={styles.buttonText}>Xem lịch</Text>
         </TouchableOpacity>
-        {employeeInfo.isPartTime ? (
-          <TouchableOpacity style={styles.button}>
+        {userInfo.isPartTime ? (
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.navigate('Schedule')}>
             <Icon name="edit" size={30} color="#000" />
             <Text style={styles.buttonText}>Chọn ca làm</Text>
           </TouchableOpacity>

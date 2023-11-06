@@ -1,6 +1,6 @@
 import {StyleSheet} from 'react-native';
 
-const styles = StyleSheet.create({
+export const styles = StyleSheet.create({
   container: {
     height: '100%',
     paddingHorizontal: 15,
@@ -65,5 +65,3 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 });
-
-export default styles;

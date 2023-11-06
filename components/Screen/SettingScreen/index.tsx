@@ -1,5 +1,7 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
+import {API, AVATAR_PATH} from '@env';
 import {
+  Alert,
   Image,
   Keyboard,
   Modal,
@@ -13,30 +15,49 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {launchImageLibrary} from 'react-native-image-picker';
 
-import styles from './styles';
+import {styles} from './styles';
+import {get_info, upload_avatar, upload_info} from '../../../api/users';
+
+type UserInfo = {
+  name: string;
+  email: string;
+  roleId: {
+    typeName: string;
+  };
+  CCCD: number;
+  phone: string;
+  isPartTime: Boolean;
+  sex: Boolean;
+  image: string;
+};
 
 const SettingScreen = () => {
-  const userInfo = {
-    name: 'Nguyễn Văn A',
-    email: 'nguyenvana@example.com',
-    role: 'nhân viên văn phòng',
-    cccd: '012345678901',
-    phone: '0123456789',
-    isPartTime: 1,
-    sex: 1,
-    image:
-      'file:///data/user/0/com.mobile/cache/rn_image_picker_lib_temp_b6186c4a-9838-4dce-a12f-02da0033efe0.jpg',
-  };
-
-  const [selectedImage, setSelectedImage] = useState(userInfo.image);
+  const [selectedImage, setSelectedImage] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
+  const [conformPassword, setConformPassword] = useState('');
   const [editPhoneOpen, setEditPhoneOpen] = useState(false);
-  const [phone, setPhone] = useState(userInfo.phone);
+  const [userInfo, setUserInfo] = useState<UserInfo>();
+  const [phone, setPhone] = useState('');
+  const [isUpdated, setIsUpdated] = useState(0);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await get_info();
+      if (res?.data.success) {
+        setUserInfo(res.data.data);
+        if (userInfo && userInfo.image) {
+          const imagePath = API + '/' + AVATAR_PATH + '/' + userInfo.image;
+          setSelectedImage(imagePath);
+        }
+      }
+    };
+    fetchData();
+  }, [userInfo, isUpdated]);
 
   const getAvatar = async () => {
-    await launchImageLibrary({mediaType: 'photo'}, res => {
+    await launchImageLibrary({mediaType: 'photo'}, async res => {
       if (res.didCancel) {
         return;
       }
@@ -46,12 +67,68 @@ const SettingScreen = () => {
         console.log('====================================');
         return;
       }
-      return setSelectedImage(res.assets[0].uri);
+      if (res.assets) {
+        const result = await upload_avatar(res.assets[0]);
+        if (result) {
+          setIsUpdated(isUpdated + 1);
+        }
+      }
     });
   };
 
   const handleEditPhone = () => {
+    if (userInfo) {
+      setEditPhoneOpen(true);
+      setPhone(userInfo?.phone);
+    }
+  };
+
+  const handleUpdatePhone = async () => {
+    if (phone.length < 10) {
+      Alert.alert('Thông báo', 'Hãy nhập SDT 10 số!');
+      return;
+    }
+    const data = {phone};
+    await upload_info(data);
     setEditPhoneOpen(false);
+  };
+
+  const handleUpdatePassword = async () => {
+    if (oldPassword === '' || newPassword === '' || conformPassword === '') {
+      Alert.alert('Thông báo', 'Vui lòng nhập đầy đủ các trường!');
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      Alert.alert('Thông báo', 'Mật khẩu phải có ít nhất 8 ký tự!');
+      return;
+    }
+
+    if (newPassword !== conformPassword) {
+      Alert.alert('Thông báo', 'Mật khẩu xác nhận không trùng khớp!');
+      return;
+    }
+
+    if (oldPassword === newPassword) {
+      Alert.alert('Thông báo', 'Hãy nhập mật khẩu mới khác với mật khẩu cũ!');
+      return;
+    }
+
+    const data = {oldPassword, newPassword};
+    const response = await upload_info(data);
+
+    if (response.data.success === false) {
+      console.log('====================================');
+      console.log(response.data.success);
+      console.log('====================================');
+      Alert.alert('Thông báo', response?.data.message);
+      return;
+    }
+    Alert.alert('Thành công', 'Cập nhật Password thành công.');
+    setModalOpen(false);
+    setOldPassword('');
+    setNewPassword('');
+    setConformPassword('');
   };
 
   return (
@@ -61,7 +138,14 @@ const SettingScreen = () => {
           <View style={styles.header} />
 
           <View style={styles.image}>
-            <Image source={{uri: selectedImage}} style={styles.avatar} />
+            <Image
+              source={
+                selectedImage
+                  ? {uri: selectedImage}
+                  : require('../../../assets/img/avatar.png')
+              }
+              style={styles.avatar}
+            />
             <TouchableOpacity onPress={getAvatar} style={styles.editButton}>
               <Icon name="pencil" size={20} color={'#000'} />
             </TouchableOpacity>
@@ -72,24 +156,24 @@ const SettingScreen = () => {
               <View style={styles.groupRow}>
                 <Icon name="envelope" size={20} color={'#000'} />
                 <Text style={styles.label}> Email:</Text>
-                <Text style={styles.text}>{userInfo.email}</Text>
+                <Text style={styles.text}>{userInfo?.email}</Text>
               </View>
               <View style={styles.groupRow}>
                 <Icon name="user" size={20} color={'#000'} />
                 <Text style={styles.label}> Tên:</Text>
-                <Text style={styles.text}>{userInfo.name}</Text>
+                <Text style={styles.text}>{userInfo?.name}</Text>
               </View>
 
               <View style={styles.groupRow}>
                 <Icon name="briefcase" size={20} color={'#000'} />
                 <Text style={styles.label}> Chức vụ:</Text>
-                <Text style={styles.text}>{userInfo.role}</Text>
+                <Text style={styles.text}>{userInfo?.roleId.typeName}</Text>
               </View>
 
               <View style={styles.groupRow}>
                 <Icon name="id-card" size={20} color={'#000'} />
                 <Text style={styles.label}> CCCD:</Text>
-                <Text style={styles.text}>{userInfo.cccd}</Text>
+                <Text style={styles.text}>{userInfo?.CCCD}</Text>
               </View>
 
               {!editPhoneOpen ? (
@@ -98,11 +182,11 @@ const SettingScreen = () => {
                   <View style={styles.groupChild}>
                     <Icon name="phone" size={20} color={'#000'} />
                     <Text style={styles.label}> Phone:</Text>
-                    <Text style={styles.text}>{userInfo.phone}</Text>
+                    <Text style={styles.text}>{userInfo?.phone}</Text>
                   </View>
 
                   <View style={styles.groupChild}>
-                    <TouchableOpacity onPress={() => setEditPhoneOpen(true)}>
+                    <TouchableOpacity onPress={handleEditPhone}>
                       <Icon name="edit" size={20} color={'#000'} />
                     </TouchableOpacity>
                   </View>
@@ -119,11 +203,12 @@ const SettingScreen = () => {
                       style={styles.input}
                       keyboardType="numeric"
                       placeholder="Hãy nhập SDT 10 số"
+                      maxLength={10}
                     />
                   </View>
 
                   <View style={styles.groupChild}>
-                    <TouchableOpacity onPress={handleEditPhone}>
+                    <TouchableOpacity onPress={handleUpdatePhone}>
                       <Icon name="check" size={20} color={'#000'} />
                     </TouchableOpacity>
                     <TouchableOpacity
@@ -139,12 +224,14 @@ const SettingScreen = () => {
                 <View style={styles.groupChild}>
                   <Icon name="venus-mars" size={20} color={'#000'} />
                   <Text style={styles.label}> Giới tính:</Text>
-                  <Text style={styles.text}>{userInfo.sex ? 'Nam' : 'Nữ'}</Text>
+                  <Text style={styles.text}>
+                    {userInfo?.sex ? 'Nam' : 'Nữ'}
+                  </Text>
                 </View>
                 <View style={[styles.groupChild, {marginLeft: 40}]}>
                   <Icon name="clock-o" size={20} color={'#000'} />
                   <Text style={styles.text}>
-                    {userInfo.isPartTime ? 'Part Time' : 'Full Time'}
+                    {userInfo?.isPartTime ? 'Part Time' : 'Full Time'}
                   </Text>
                 </View>
               </View>
@@ -152,7 +239,12 @@ const SettingScreen = () => {
 
             <TouchableOpacity
               style={styles.passButton}
-              onPress={() => setModalOpen(true)}>
+              onPress={() => {
+                setModalOpen(true);
+                setOldPassword('');
+                setNewPassword('');
+                setConformPassword('');
+              }}>
               <Text style={{fontSize: 20, fontWeight: 'bold'}}>
                 Đổi mật khẩu
               </Text>
@@ -174,22 +266,27 @@ const SettingScreen = () => {
                       value={oldPassword}
                       onChangeText={setOldPassword}
                       style={styles.modalInput}
+                      secureTextEntry
                     />
                     <TextInput
                       placeholder="Mật khẩu mới"
                       value={newPassword}
                       onChangeText={setNewPassword}
                       style={styles.modalInput}
+                      secureTextEntry
                     />
                     <TextInput
                       placeholder="Xác nhận mật khẩu"
-                      value={newPassword}
-                      onChangeText={setNewPassword}
+                      value={conformPassword}
+                      onChangeText={setConformPassword}
                       style={styles.modalInput}
+                      secureTextEntry
                     />
                   </View>
                   <View style={styles.modalButton}>
-                    <TouchableOpacity style={styles.submitButton}>
+                    <TouchableOpacity
+                      style={styles.submitButton}
+                      onPress={handleUpdatePassword}>
                       <Text style={styles.modalText}>Lưu</Text>
                     </TouchableOpacity>
                     <TouchableOpacity

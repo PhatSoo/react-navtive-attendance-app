@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   Keyboard,
   Modal,
@@ -9,11 +9,43 @@ import {
 } from 'react-native';
 import {Calendar} from 'react-native-calendars';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import styles from './styles';
+import {styles} from './styles';
+import {get_attendance} from '../../../api/users';
+
+type Atendance = {
+  checkInTime: Date;
+  checkOutTime: Date;
+  shiftRegistration: {
+    workDate: Date;
+    workShift: {
+      shiftName: String;
+    };
+  };
+};
 
 const CalendarScreen = ({navigation}: any) => {
   const [daySelected, setDaySelected] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
+  const [listSchedule, setListSchedule] = useState([]);
+
+  useEffect(() => {
+    const get_attendances = async () => {
+      const list: Date[] = [];
+      const res = await get_attendance();
+
+      if (res.data.success) {
+        res.data.data.map((item: Atendance) => {
+          list.push(item.shiftRegistration.workDate);
+        });
+      }
+
+      console.log('====================================');
+      console.log(list);
+      console.log('====================================');
+    };
+
+    get_attendances();
+  }, []);
 
   const handleForm = () => {
     navigation.navigate('Form', {daySelected});
@@ -36,6 +68,9 @@ const CalendarScreen = ({navigation}: any) => {
             selected: true,
             disableTouchEvent: true,
             selectedColor: '#5EDFFF',
+          },
+          listSchedule: {
+            selectedColor: '#000',
           },
         }}
       />

@@ -12,7 +12,7 @@ import {
   View,
 } from 'react-native';
 
-import styles from './styles';
+import {styles} from './styles';
 import {RadioGroup} from 'react-native-radio-buttons-group';
 import {useRoute} from '@react-navigation/native';
 
