@@ -59,6 +59,7 @@ export const styles = StyleSheet.create({
     borderWidth: 2,
     borderRadius: 20,
     padding: 20,
+    justifyContent: 'space-around',
   },
   modalTitle: {
     fontSize: 25,
@@ -66,7 +67,9 @@ export const styles = StyleSheet.create({
     color: '#000',
     textAlign: 'center',
   },
-  modalContent: {},
+  modalContent: {
+    height: '70%',
+  },
   modalGroup: {
     flexDirection: 'row',
     justifyContent: 'space-between',

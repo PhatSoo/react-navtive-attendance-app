@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {API, AVATAR_PATH} from '@env';
+import {API, AVATAR_PATH, ATTENDANCE_PATH} from '@env';
 import {
   Alert,
   Image,
@@ -16,7 +16,12 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import {launchImageLibrary} from 'react-native-image-picker';
 
 import {styles} from './styles';
-import {get_info, upload_avatar, upload_info} from '../../../api/users';
+import {
+  get_info,
+  upload_avatar,
+  upload_image,
+  upload_info,
+} from '../../../api/users';
 
 type UserInfo = {
   name: string;
@@ -28,6 +33,7 @@ type UserInfo = {
   phone: string;
   isPartTime: Boolean;
   sex: Boolean;
+  avatar: string;
   image: string;
 };
 
@@ -41,22 +47,29 @@ const SettingScreen = () => {
   const [userInfo, setUserInfo] = useState<UserInfo>();
   const [phone, setPhone] = useState('');
   const [isUpdated, setIsUpdated] = useState(0);
+  const [imageModal, setImageModal] = useState(false);
+  const [imageLink, setImageLink] = useState('');
 
+  // Get user login info
   useEffect(() => {
     const fetchData = async () => {
       const res = await get_info();
       if (res?.data.success) {
         setUserInfo(res.data.data);
+        if (userInfo && userInfo.avatar) {
+          const avatarPath = API + '/' + AVATAR_PATH + '/' + userInfo.avatar;
+          setSelectedImage(avatarPath);
+        }
         if (userInfo && userInfo.image) {
-          const imagePath = API + '/' + AVATAR_PATH + '/' + userInfo.image;
-          setSelectedImage(imagePath);
+          const imagePath = API + '/' + ATTENDANCE_PATH + '/' + userInfo.image;
+          setImageLink(imagePath);
         }
       }
     };
     fetchData();
   }, [userInfo, isUpdated]);
 
-  const getAvatar = async () => {
+  const getAvatar = async (store: string) => {
     await launchImageLibrary({mediaType: 'photo'}, async res => {
       if (res.didCancel) {
         return;
@@ -68,9 +81,20 @@ const SettingScreen = () => {
         return;
       }
       if (res.assets) {
-        const result = await upload_avatar(res.assets[0]);
-        if (result) {
-          setIsUpdated(isUpdated + 1);
+        if (store === 'avatar') {
+          const result = await upload_avatar(res.assets[0]);
+          if (result) {
+            setIsUpdated(isUpdated + 1);
+          }
+        } else if (store === 'image') {
+          const result = await upload_image(res.assets[0]);
+          if (result) {
+            Alert.alert(
+              'Thông báo',
+              'Bạn đã cập nhận ảnh chấm công thành công!',
+            );
+            setIsUpdated(isUpdated + 1);
+          }
         }
       }
     });
@@ -131,6 +155,56 @@ const SettingScreen = () => {
     setConformPassword('');
   };
 
+  const renderImageModal = () => {
+    return (
+      <Modal
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setImageModal(false)}
+        visible={imageModal}>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={styles.modalContainer}>
+            <View style={styles.modal}>
+              <Text style={styles.modalTitle}>Thay đổi mật khẩu</Text>
+              <View
+                style={{
+                  minHeight: 200,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  padding: 20,
+                }}>
+                {!imageLink ? (
+                  <Text style={styles.text}>
+                    Bạn chưa chọn ảnh để chấm công
+                  </Text>
+                ) : (
+                  <Image
+                    source={{uri: imageLink}}
+                    width={300}
+                    height={300}
+                    borderRadius={20}
+                  />
+                )}
+              </View>
+              <View style={styles.modalButton}>
+                <TouchableOpacity
+                  style={styles.submitButton}
+                  onPress={() => getAvatar('image')}>
+                  <Text style={styles.modalText}>Chọn ảnh</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.cancelButton}
+                  onPress={() => setImageModal(false)}>
+                  <Text style={styles.modalText}>Trở về</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+    );
+  };
+
   return (
     <SafeAreaView>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -146,7 +220,9 @@ const SettingScreen = () => {
               }
               style={styles.avatar}
             />
-            <TouchableOpacity onPress={getAvatar} style={styles.editButton}>
+            <TouchableOpacity
+              onPress={() => getAvatar('avatar')}
+              style={styles.editButton}>
               <Icon name="pencil" size={20} color={'#000'} />
             </TouchableOpacity>
           </View>
@@ -237,20 +313,27 @@ const SettingScreen = () => {
               </View>
             </View>
 
-            <TouchableOpacity
-              style={styles.passButton}
-              onPress={() => {
-                setModalOpen(true);
-                setOldPassword('');
-                setNewPassword('');
-                setConformPassword('');
-              }}>
-              <Text style={{fontSize: 20, fontWeight: 'bold'}}>
-                Đổi mật khẩu
-              </Text>
-            </TouchableOpacity>
+            <View style={styles.buttonGroup}>
+              <TouchableOpacity
+                style={styles.imageButton}
+                onPress={() => setImageModal(true)}>
+                <Text style={styles.buttonText}>Ảnh chấm công</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.passButton}
+                onPress={() => {
+                  setModalOpen(true);
+                  setOldPassword('');
+                  setNewPassword('');
+                  setConformPassword('');
+                }}>
+                <Text style={styles.buttonText}>Đổi mật khẩu</Text>
+              </TouchableOpacity>
+            </View>
           </View>
 
+          {renderImageModal()}
           <Modal
             animationType="slide"
             transparent={true}

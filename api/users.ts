@@ -38,6 +38,25 @@ export const upload_avatar = async (data: any) => {
   return false;
 };
 
+export const upload_image = async (data: any) => {
+  const formData = new FormData();
+  formData.append('image', {
+    name: data.fileName,
+    uri: data.uri,
+    type: data.type,
+  });
+
+  const response = await apiManager.post('/me/image', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  if (response.status === 204) {
+    return true;
+  }
+  return false;
+};
+
 export const upload_info = async (data: any) => {
   try {
     return await apiManager.put('/me', data);
@@ -66,6 +85,15 @@ export const schedule_chosen = async (data: any) => {
 export const get_attendance = async () => {
   try {
     return await apiManager.get('/me/attendance');
+  } catch (error: any) {
+    return error.response;
+  }
+};
+
+export const attendance = async () => {
+  try {
+    return await apiManager.get('/me/image');
+    // return;
   } catch (error: any) {
     return error.response;
   }

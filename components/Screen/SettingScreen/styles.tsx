@@ -5,6 +5,7 @@ export const styles = StyleSheet.create({
     height: '100%',
     alignItems: 'center',
     backgroundColor: '#BDF1F6',
+    paddingBottom: 10,
   },
   header: {
     backgroundColor: '#ECFCFF',
@@ -58,7 +59,6 @@ export const styles = StyleSheet.create({
     padding: 10,
     alignItems: 'center',
     borderRadius: 20,
-    marginVertical: 20,
   },
   modalContainer: {
     justifyContent: 'center',
@@ -99,6 +99,10 @@ export const styles = StyleSheet.create({
     borderRadius: 20,
     borderColor: '#000',
   },
+  buttonText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
   cancelButton: {
     backgroundColor: '#FF0000',
     paddingHorizontal: 30,
@@ -116,5 +120,17 @@ export const styles = StyleSheet.create({
     width: '55%',
     fontSize: 15,
     marginLeft: 10,
+  },
+  imageButton: {
+    backgroundColor: 'red',
+    width: '80%',
+    padding: 10,
+    alignItems: 'center',
+    borderRadius: 20,
+  },
+  buttonGroup: {
+    width: '100%',
+    alignItems: 'center',
+    gap: 20,
   },
 });

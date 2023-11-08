@@ -14,7 +14,7 @@ const HomeScreen = ({navigation}: any) => {
       typeName: 'Nhân viên văn phòng',
     },
     isPartTime: false,
-    image: '',
+    avatar: '',
   });
   const [selectedImage, setSelectedImage] = useState('');
 
@@ -23,8 +23,8 @@ const HomeScreen = ({navigation}: any) => {
       const res = await get_info();
       if (res?.data.success) {
         setUserInfo(res.data.data);
-        if (userInfo && userInfo.image) {
-          const imagePath = API + '/' + AVATAR_PATH + '/' + userInfo.image;
+        if (userInfo && userInfo.avatar) {
+          const imagePath = API + '/' + AVATAR_PATH + '/' + userInfo.avatar;
           setSelectedImage(imagePath);
         }
       }
