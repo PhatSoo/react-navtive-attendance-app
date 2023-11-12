@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import {clearToken, isTokenExpired} from '../../utils';
 
-import ShiftInformation from '../HeaderRight/ShiftInformation';
+import ShiftInformation from '../Infomations/ShiftInformation';
 import HomeScreen from './HomeScreen';
 import CalendarScreen from './CalendarScreen';
 import SettingScreen from './SettingScreen';
@@ -54,7 +54,7 @@ const Screen = ({navigation}: any) => {
         options={{headerShown: false}}
       />
       <Stack.Screen
-        options={{headerShown: false}}
+        options={{headerTitle: 'Chấm công'}}
         name="Attendance"
         component={Attendance}
       />

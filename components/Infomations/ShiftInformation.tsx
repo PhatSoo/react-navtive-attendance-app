@@ -29,6 +29,32 @@ const ShiftInformation = () => {
     return <Text>Loading...</Text>;
   }
 
+  const renderShiftInfo = () => {
+    return (
+      <View style={styles.modalContainer}>
+        <View style={styles.modalContent}>
+          <Text>Thời gian làm của các ca:</Text>
+          {shifts &&
+            shifts.map(item => (
+              <Text key={item.shiftName}>
+                - {item.shiftName}: {item.startTime}h-{item.endTime}h
+              </Text>
+            ))}
+
+          <Text style={styles.note}>
+            Lưu ý: nếu không chọn thì mặc định nhân viên sẽ rảnh toàn bộ ngày.
+          </Text>
+          <Text> - Nếu không làm thì cứ bấm xác nhận.</Text>
+          <TouchableOpacity
+            onPress={() => setInfoModalVisible(false)}
+            style={styles.closeButton}>
+            <Text style={styles.closeButtonText}>Đóng</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  };
+
   return (
     <>
       <TouchableOpacity
@@ -42,27 +68,7 @@ const ShiftInformation = () => {
         animationType="slide"
         transparent={true}
         onRequestClose={() => setInfoModalVisible(false)}>
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text>Thời gian làm của các ca:</Text>
-            {shifts &&
-              shifts.map(item => (
-                <Text key={item.shiftName}>
-                  - {item.shiftName}: {item.startTime}h-{item.endTime}h
-                </Text>
-              ))}
-
-            <Text style={styles.note}>
-              Lưu ý: nếu không chọn thì mặc định nhân viên sẽ rảnh toàn bộ ngày.
-            </Text>
-            <Text> - Nếu không làm thì cứ bấm xác nhận.</Text>
-            <TouchableOpacity
-              onPress={() => setInfoModalVisible(false)}
-              style={styles.closeButton}>
-              <Text style={styles.closeButtonText}>Đóng</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+        {renderShiftInfo()}
       </Modal>
     </>
   );

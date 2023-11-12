@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {
+  Alert,
   Keyboard,
   Modal,
   ScrollView,
@@ -29,9 +30,9 @@ type Attendance = {
   checkOutTime: Date;
   shiftRegistration: {
     workDate: Date;
-    workShift: {
-      shiftName: String;
-    };
+  };
+  workShift: {
+    shiftName: String;
   };
   status: Status;
 };
@@ -66,25 +67,11 @@ const CalendarScreen = ({navigation}: any) => {
             checkIn: item.checkInTime,
             checkOut: item.checkOutTime,
             status: item.status,
-            shift: item.shiftRegistration.workShift.shiftName,
+            shift: item.workShift.shiftName,
           };
 
           list.push(data);
         });
-
-        // let markedDates: any = {};
-
-        // list.forEach((item: any) => {
-        //   if (item.status === Status.NULL) {
-        //     markedDates[item.id] = {
-        //       [item.formattedDate]: {selectedColor: 'gray', selected: true},
-        //       checkIn: item.checkIn,
-        //       checkOut: item.checkOut,
-        //       status: item.status,
-        //       shift: item.shift,
-        //     };
-        //   }
-        // });
 
         const markedDates = list.reduce(
           (
@@ -93,34 +80,23 @@ const CalendarScreen = ({navigation}: any) => {
           ) => {
             switch (date.status) {
               case Status.NULL:
-                acc[date.formattedDate] = {
-                  selectedColor: 'gray',
-                  selected: true,
-                };
+                if (new Date(date.formattedDate) > new Date()) {
+                  acc[date.formattedDate] = {
+                    selectedColor: 'gray',
+                    selected: true,
+                  };
+                } else {
+                  acc[date.formattedDate] = {
+                    selectedColor: 'red',
+                    selected: true,
+                  };
+                }
                 break;
               case Status.WORKING:
                 acc[date.formattedDate] = {
                   selectedColor: 'yellow',
                   selected: true,
                 };
-                break;
-              case Status.EARLY:
-                acc[date.formattedDate] = {
-                  selectedColor: 'red',
-                  selected: true,
-                };
-                break;
-              case Status.LATE:
-                acc[date.formattedDate] = {
-                  selectedColor: 'red',
-                  selected: true,
-                };
-                break;
-              case Status.LEAVE:
-                break;
-              case Status.UNAUTHORIZED_LEAVE:
-                break;
-              case Status.BUSINESS_TRIP:
                 break;
               default:
                 acc[date.formattedDate] = {
@@ -158,9 +134,102 @@ const CalendarScreen = ({navigation}: any) => {
           result[key] = listSchedule[key];
         }
       }
+
+      if (result.length === 0) {
+        Alert.alert(
+          'Thông báo',
+          `Bạn không có ca làm trong ngày ${daySelected}`,
+        );
+        return;
+      }
       setModalOpen(true);
       setDayDetails(result);
     }
+  };
+
+  const countTotalTime = (checkIn: string, checkOut: string) => {
+    // Phân tách chuỗi thành giờ, phút, giây và chuyển đổi sang số giây
+    const convertToSeconds = (timeString: string) => {
+      if (timeString) {
+        const [hours, minutes, seconds] = timeString
+          .split(':')
+          .map((x: string) => parseInt(x, 10));
+        return hours * 3600 + minutes * 60 + seconds;
+      }
+      return 0;
+    };
+
+    if (checkIn || checkOut) {
+      const time1InSeconds = convertToSeconds(checkIn);
+      const time2InSeconds = convertToSeconds(checkOut);
+
+      // Tính chênh lệch giữa hai thời gian
+      const diffInSeconds = Math.abs(time2InSeconds - time1InSeconds);
+
+      // Chuyển đổi chênh lệch thành giờ, phút, giây
+      const hoursDiff = Math.floor(diffInSeconds / 3600);
+      const minutesDiff = Math.floor((diffInSeconds % 3600) / 60);
+      const secondsDiff = diffInSeconds % 60;
+      return `${hoursDiff} giờ, ${minutesDiff} phút, ${secondsDiff} giây`;
+    }
+  };
+
+  const renderModalDetails = () => {
+    return (
+      <Modal
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setModalOpen(false)}
+        visible={modalOpen}>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={styles.modalContainer}>
+            <View style={styles.modal}>
+              <Text style={styles.modalTitle}>{daySelected}</Text>
+              <ScrollView>
+                <View style={styles.modalContent}>
+                  {dayDetails &&
+                    dayDetails.map((item: any) => (
+                      <View key={item.id}>
+                        <Text>{item.shift}:</Text>
+                        <View style={styles.modalGroup}>
+                          <Text style={styles.modalLabel}>Check in:</Text>
+                          <Text style={styles.modalText}>{item.checkIn}</Text>
+                        </View>
+                        <View style={styles.separate} />
+
+                        <View style={styles.modalGroup}>
+                          <Text style={styles.modalLabel}>Check out:</Text>
+                          <Text style={styles.modalText}>{item.checkOut}</Text>
+                        </View>
+                        <View style={styles.separate} />
+
+                        <View style={styles.modalGroup}>
+                          <Text style={styles.modalLabel}>Total:</Text>
+                          <Text style={styles.modalText}>
+                            {countTotalTime(item.checkOut, item.checkIn)}
+                          </Text>
+                        </View>
+                        <View style={styles.separate} />
+
+                        <View style={styles.modalGroup}>
+                          <Text style={styles.modalLabel}>Status:</Text>
+                          <Text style={styles.modalText}>{item.status}</Text>
+                        </View>
+                        <View style={styles.separate} />
+                      </View>
+                    ))}
+                </View>
+              </ScrollView>
+              <TouchableOpacity
+                style={[styles.button, {alignSelf: 'center'}]}
+                onPress={() => setModalOpen(false)}>
+                <Text style={styles.buttonText}>Xong</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+    );
   };
 
   return (
@@ -188,11 +257,11 @@ const CalendarScreen = ({navigation}: any) => {
             </View>
             <View style={styles.note}>
               <View style={[styles.square, {backgroundColor: 'yellow'}]} />
-              <Text>Chưa chấm công</Text>
+              <Text>Đang làm</Text>
             </View>
             <View style={styles.note}>
               <View style={[styles.square, {backgroundColor: 'red'}]} />
-              <Text>Chấm công muộn</Text>
+              <Text>Không chấm công</Text>
             </View>
             <View style={styles.note}>
               <View style={[styles.square, {backgroundColor: 'gray'}]} />
@@ -214,61 +283,7 @@ const CalendarScreen = ({navigation}: any) => {
         )}
       </View>
 
-      <Modal
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setModalOpen(false)}
-        visible={modalOpen}>
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View style={styles.modalContainer}>
-            <View style={styles.modal}>
-              <Text style={styles.modalTitle}>{daySelected}</Text>
-
-              <View style={styles.modalContent}>
-                <ScrollView>
-                  {dayDetails &&
-                    dayDetails.map((item: any) => (
-                      <View key={item.id}>
-                        <Text>{item.shift}:</Text>
-                        <View style={styles.modalGroup}>
-                          <Text style={styles.modalLabel}>Check in:</Text>
-                          <Text style={styles.modalText}>{item.checkIn}h</Text>
-                        </View>
-                        <View style={styles.separate} />
-
-                        <View style={styles.modalGroup}>
-                          <Text style={styles.modalLabel}>Check out:</Text>
-                          <Text style={styles.modalText}>{item.checkOut}h</Text>
-                        </View>
-                        <View style={styles.separate} />
-
-                        <View style={styles.modalGroup}>
-                          <Text style={styles.modalLabel}>Total:</Text>
-                          <Text style={styles.modalText}>
-                            {item.checkOut - item.checkIn}h
-                          </Text>
-                        </View>
-                        <View style={styles.separate} />
-
-                        <View style={styles.modalGroup}>
-                          <Text style={styles.modalLabel}>Status:</Text>
-                          <Text style={styles.modalText}>{item.status}</Text>
-                        </View>
-                        <View style={styles.separate} />
-                      </View>
-                    ))}
-                </ScrollView>
-              </View>
-
-              <TouchableOpacity
-                style={[styles.button, {alignSelf: 'center'}]}
-                onPress={() => setModalOpen(false)}>
-                <Text style={styles.buttonText}>Xong</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </TouchableWithoutFeedback>
-      </Modal>
+      {renderModalDetails()}
     </SafeAreaView>
   );
 };

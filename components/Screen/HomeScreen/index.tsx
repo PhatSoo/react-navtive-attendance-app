@@ -42,7 +42,7 @@ const HomeScreen = ({navigation}: any) => {
             <Text style={styles.infoText}> {userInfo.roleId.typeName}</Text>
           </Text>
         </View>
-        <View>
+        <View style={styles.imageContainer}>
           <Image
             source={
               selectedImage

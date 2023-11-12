@@ -18,8 +18,8 @@ export const styles = StyleSheet.create({
   },
   textContainer: {
     flex: 1,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    // flexDirection: 'row',
+    // flexWrap: 'wrap',
     justifyContent: 'center',
   },
   infoText: {
@@ -34,13 +34,23 @@ export const styles = StyleSheet.create({
     textAlign: 'center',
     fontStyle: 'italic',
   },
+  imageContainer: {
+    width: 120, // Điều chỉnh kích thước tùy theo nhu cầu của bạn
+    height: 120, // Điều chỉnh kích thước tùy theo nhu cầu của bạn
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 10,
+  },
   avatar: {
-    width: 120,
-    height: 120,
+    // width: 120,
+    // height: 120,
     borderRadius: 100,
-    marginTop: 20,
+    // marginTop: 20,
     borderWidth: 2,
-    borderColor: 'white',
+    // borderColor: 'white',
+    width: '100%',
+    height: '100%',
+    resizeMode: 'center',
   },
   buttonContainer: {
     height: (windowHeight / 4) * 3,

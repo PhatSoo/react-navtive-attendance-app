@@ -6,13 +6,18 @@ type userLoginData = {
 };
 
 export const user_login = async (data: userLoginData) => {
-  const response = await apiManager.post('/login', data);
+  try {
+    const response = await apiManager.post('/login', data);
 
-  if (response.data.success) {
-    apiManager.defaults.headers.common.Authorization = response.data.token;
+    if (response.data.success) {
+      apiManager.defaults.headers.common.Authorization = response.data.token;
+    }
+
+    return response;
+  } catch (error: any) {
+    console.error('Full error object:', error);
+    console.error('Error as JSON:', JSON.stringify(error, null, 2));
   }
-
-  return response;
 };
 
 export const get_info = async () => {
@@ -96,5 +101,24 @@ export const attendance = async () => {
     // return;
   } catch (error: any) {
     return error.response;
+  }
+};
+
+export const get_existing_shift = async (shiftId: string) => {
+  try {
+    const res = await apiManager.get(`me/existing-shift/${shiftId}`);
+    return res.data;
+  } catch (error: any) {
+    return error.response.data.message;
+  }
+};
+
+export const check = async (checkType: string, attendanceId: string) => {
+  try {
+    const data = {checkType, attendanceId};
+
+    return await apiManager.put('me/check', data);
+  } catch (error: any) {
+    console.log(error.response.data.message);
   }
 };

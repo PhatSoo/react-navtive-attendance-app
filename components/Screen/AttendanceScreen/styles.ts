@@ -16,10 +16,14 @@ export const styles = StyleSheet.create({
     padding: 20,
   },
   bottom: {
-    flexGrow: 1,
-    // backgroundColor: 'green',
+    // flexGrow: 1,
+    // padding: 10,
+    // alignItems: 'center',
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
     padding: 10,
-    alignItems: 'center',
   },
   camera: {
     flexGrow: 1,
@@ -27,20 +31,46 @@ export const styles = StyleSheet.create({
   anim: {
     width: 50,
     height: 50,
-  },
-  text: {
-    color: '#000',
-    fontWeight: 'bold',
-    textAlign: 'center',
+    alignSelf: 'center',
   },
   buttonGroup: {
     flexDirection: 'row',
+    justifyContent: 'center',
   },
   button: {
-    marginTop: 50,
-    padding: 20,
-    backgroundColor: '#3E64FF',
-    borderRadius: 20,
-    width: '40%',
+    marginTop: 10,
+    padding: 10,
+    backgroundColor: '#b3d9ff',
+    borderRadius: 5,
+  },
+  section: {
+    marginBottom: 20,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#004d99', // Màu xanh đậm
+    marginBottom: 10,
+  },
+  text: {
+    fontSize: 16,
+    color: '#008ae6', // Màu xanh dương
+  },
+  buttonText: {
+    fontSize: 20,
+    color: '#004080', // Màu xanh đậm nhấn
+    textAlign: 'center',
+    fontWeight: 'bold',
+  },
+  separator: {
+    height: 1, // Khoảng cách mong muốn giữa các phần tử
+    // width: 20,
+    backgroundColor: '#000',
+    marginBottom: 20,
+  },
+  statusText: {
+    fontSize: 16,
+    color: '#008ae6',
+    textAlign: 'center',
   },
 });

@@ -23,7 +23,20 @@ export const clearToken = async () => {
 };
 
 export const getCurrentUserId = (token: string) => {
-  return decode(token, JWT_PASS).then(result => {
+  return decode(token, JWT_PASS).then((result: any) => {
     return result.payload.id;
   });
+};
+
+export const get_current_time_format = () => {
+  const currentDate = new Date();
+  const hours =
+    (currentDate.getHours() < 10 ? '0' : '') + currentDate.getHours();
+  const minutes =
+    (currentDate.getMinutes() < 10 ? '0' : '') + currentDate.getMinutes();
+  const seconds =
+    (currentDate.getSeconds() < 10 ? '0' : '') + currentDate.getSeconds();
+  const formattedTime = `${hours}:${minutes}:${seconds}`;
+
+  return formattedTime;
 };

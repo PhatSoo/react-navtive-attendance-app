@@ -142,9 +142,6 @@ const SettingScreen = () => {
     const response = await upload_info(data);
 
     if (response.data.success === false) {
-      console.log('====================================');
-      console.log(response.data.success);
-      console.log('====================================');
       Alert.alert('Thông báo', response?.data.message);
       return;
     }

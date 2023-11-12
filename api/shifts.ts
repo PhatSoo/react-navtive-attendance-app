@@ -13,3 +13,15 @@ export const get_shift = async () => {
     return error.response;
   }
 };
+
+export const get_current_shift = async () => {
+  try {
+    const res = await apiManager.get('api/current-shift');
+    if (res.status === 200) {
+      return res.data;
+    }
+  } catch (error: any) {
+    console.log(error.response);
+    // return error.response;
+  }
+};
