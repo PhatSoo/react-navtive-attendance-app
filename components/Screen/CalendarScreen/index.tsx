@@ -13,6 +13,7 @@ import {Calendar} from 'react-native-calendars';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {styles} from './styles';
 import {get_attendance} from '../../../api/users';
+import {get_current_shift} from '../../../api/shifts';
 
 enum Status {
   NULL = 'NULL', // Default
@@ -54,6 +55,8 @@ const CalendarScreen = ({navigation}: any) => {
     const get_attendances = async () => {
       const list: any = [];
       const res = await get_attendance();
+
+      const currentShift = await get_current_shift();
 
       if (res.data.success) {
         // Get data from API and push to "list"
@@ -119,9 +122,6 @@ const CalendarScreen = ({navigation}: any) => {
     get_attendances();
   }, []);
 
-  // Get attendance details
-  useEffect(() => {}, []);
-
   const handleForm = () => {
     navigation.navigate('Form', {daySelected});
   };
@@ -159,7 +159,7 @@ const CalendarScreen = ({navigation}: any) => {
       return 0;
     };
 
-    if (checkIn || checkOut) {
+    if (checkIn && checkOut) {
       const time1InSeconds = convertToSeconds(checkIn);
       const time2InSeconds = convertToSeconds(checkOut);
 
@@ -172,6 +172,7 @@ const CalendarScreen = ({navigation}: any) => {
       const secondsDiff = diffInSeconds % 60;
       return `${hoursDiff} giờ, ${minutesDiff} phút, ${secondsDiff} giây`;
     }
+    return '';
   };
 
   const renderModalDetails = () => {

@@ -160,13 +160,16 @@ const Attendance = ({navigation}: any) => {
               //   shiftInfo.endTime,
               // );
 
-              const checks = await check(checkType, attendanceInfo._id);
+              const checks = await check(checkType, attendanceInfo.data?._id);
               if (checks && checks.data.success) {
                 setCheckType('');
                 Alert.alert('Thông báo!', 'Bạn đã chấm công thành công.');
                 return;
               }
             }
+            Alert.alert('Thông báo!', 'Bạn đã chấm công thất bại.');
+            return;
+          } else {
             Alert.alert('Thông báo!', 'Bạn đã chấm công thất bại.');
             return;
           }
@@ -280,6 +283,7 @@ const Attendance = ({navigation}: any) => {
           setShiftInfo(currentShift.data);
 
           const isAttendance = await get_existing_shift(currentShift.data._id);
+
           if (isAttendance && isAttendance.success) {
             setAttendanceInfo({success: true, data: {...isAttendance.data}});
           } else {
@@ -367,7 +371,7 @@ const Attendance = ({navigation}: any) => {
             <View style={styles.separator} />
 
             <View style={styles.bottom}>
-              {attendanceInfo ? (
+              {attendanceInfo?.success ? (
                 <>
                   <TouchableOpacity
                     style={styles.button}

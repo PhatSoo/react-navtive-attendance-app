@@ -23,7 +23,7 @@ export const styles = StyleSheet.create({
   },
   textDate: {
     paddingVertical: 10,
-    fontSize: 25,
+    fontSize: 20,
   },
   text: {
     color: 'red',

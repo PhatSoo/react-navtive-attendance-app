@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import {clearToken, isTokenExpired} from '../../utils';
 
-import ShiftInformation from '../Infomations/ShiftInformation';
+import ShiftInformation from '../Modals/ShiftInformation';
 import HomeScreen from './HomeScreen';
 import CalendarScreen from './CalendarScreen';
 import SettingScreen from './SettingScreen';

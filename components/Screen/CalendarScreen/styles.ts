@@ -60,6 +60,7 @@ export const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 20,
     justifyContent: 'space-around',
+    height: '70%',
   },
   modalTitle: {
     fontSize: 25,

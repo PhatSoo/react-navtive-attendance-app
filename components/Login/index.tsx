@@ -17,6 +17,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import {user_login} from '../../api/users';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {clearToken} from '../../utils';
+import Loading from '../Modals/Loading';
 
 const Login = ({navigation}: any) => {
   const [email, setEmail] = useState('');
@@ -26,6 +27,7 @@ const Login = ({navigation}: any) => {
   const [checkPass, isCheckPass] = useState({status: true, error: ''});
   const [exitApp, setExitApp] = useState(false);
   const [loginFailed, setLoginFailed] = useState('');
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     clearToken();
@@ -111,12 +113,14 @@ const Login = ({navigation}: any) => {
     }
 
     if (isEmailValid && isPasswordValid) {
+      setLoading(true);
       user_login(formData).then((result: any) => {
         if (result?.data.success) {
           AsyncStorage.setItem('AccessToken', result.data.token);
           navigation.replace('Screen');
         } else {
           setLoginFailed(result?.data.message);
+          setLoading(false);
         }
       });
     }
@@ -171,6 +175,7 @@ const Login = ({navigation}: any) => {
             ''
           )}
         </View>
+        {loading && <Loading isLoading={loading} />}
         <Text style={styles.textDanger}>{loginFailed}</Text>
 
         <View style={styles.row}>

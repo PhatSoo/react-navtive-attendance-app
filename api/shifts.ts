@@ -21,7 +21,6 @@ export const get_current_shift = async () => {
       return res.data;
     }
   } catch (error: any) {
-    console.log(error.response);
-    // return error.response;
+    return error.response;
   }
 };

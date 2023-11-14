@@ -73,9 +73,12 @@ const ScheduleScreen = () => {
 
     for (let i = 0; i < 7; i++) {
       const nextDay = new Date(
-        nextMonday.getFullYear(),
-        nextMonday.getMonth(),
-        nextMonday.getDate() + i,
+        // nextMonday.getFullYear(),
+        // nextMonday.getMonth(),
+        // nextMonday.getDate() + i,
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate() + i,
       );
       const dayString = `${nextDay.toLocaleDateString('vi-VN', {
         weekday: 'long',
