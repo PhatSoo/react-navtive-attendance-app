@@ -37,7 +37,10 @@ const ShiftInformation = () => {
           {shifts &&
             shifts.map(item => (
               <Text key={item.shiftName}>
-                - {item.shiftName}: {item.startTime}h-{item.endTime}h
+                - {item.shiftName}:{' '}
+                <Text style={{fontWeight: 'bold', fontStyle: 'italic'}}>
+                  {item.startTime}h-{item.endTime}h
+                </Text>
               </Text>
             ))}
 
@@ -45,6 +48,11 @@ const ShiftInformation = () => {
             Lưu ý: nếu không chọn thì mặc định nhân viên sẽ rảnh toàn bộ ngày.
           </Text>
           <Text> - Nếu không làm thì cứ bấm xác nhận.</Text>
+          <Text>
+            - Thời gian kết thúc là lúc{' '}
+            <Text style={{fontWeight: 'bold'}}>16h30p</Text> ngày{' '}
+            <Text style={{color: 'red'}}>Chủ Nhật</Text>
+          </Text>
           <TouchableOpacity
             onPress={() => setInfoModalVisible(false)}
             style={styles.closeButton}>

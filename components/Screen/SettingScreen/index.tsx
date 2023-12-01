@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {API, AVATAR_PATH, ATTENDANCE_PATH} from '@env';
+import {API, AVATAR_PATH} from '@env';
 import {
   Alert,
   Image,
@@ -13,20 +13,14 @@ import {
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import {launchImageLibrary} from 'react-native-image-picker';
 
 import {styles} from './styles';
-import {
-  get_info,
-  upload_avatar,
-  upload_image,
-  upload_info,
-} from '../../../api/users';
+import {get_info, upload_info} from '../../../api/users';
 
 type UserInfo = {
   name: string;
   email: string;
-  roleId: {
+  role: {
     typeName: string;
   };
   CCCD: number;
@@ -46,9 +40,9 @@ const SettingScreen = () => {
   const [editPhoneOpen, setEditPhoneOpen] = useState(false);
   const [userInfo, setUserInfo] = useState<UserInfo>();
   const [phone, setPhone] = useState('');
-  const [isUpdated, setIsUpdated] = useState(0);
-  const [imageModal, setImageModal] = useState(false);
-  const [imageLink, setImageLink] = useState('');
+  // const [isUpdated, setIsUpdated] = useState(0);
+  // const [imageModal, setImageModal] = useState(false);
+  // const [imageLink, setImageLink] = useState('');
 
   // Get user login info
   useEffect(() => {
@@ -60,45 +54,45 @@ const SettingScreen = () => {
           const avatarPath = API + '/' + AVATAR_PATH + '/' + userInfo.avatar;
           setSelectedImage(avatarPath);
         }
-        if (userInfo && userInfo.image) {
-          const imagePath = API + '/' + ATTENDANCE_PATH + '/' + userInfo.image;
-          setImageLink(imagePath);
-        }
+        // if (userInfo && userInfo.image) {
+        //   const imagePath = API + '/' + ATTENDANCE_PATH + '/' + userInfo.image;
+        //   setImageLink(imagePath);
+        // }
       }
     };
     fetchData();
-  }, [userInfo, isUpdated]);
+  }, [userInfo /*, isUpdated*/]);
 
-  const getAvatar = async (store: string) => {
-    await launchImageLibrary({mediaType: 'photo'}, async res => {
-      if (res.didCancel) {
-        return;
-      }
-      if (res.errorCode) {
-        console.log('====================================');
-        console.log(res.errorMessage);
-        console.log('====================================');
-        return;
-      }
-      if (res.assets) {
-        if (store === 'avatar') {
-          const result = await upload_avatar(res.assets[0]);
-          if (result) {
-            setIsUpdated(isUpdated + 1);
-          }
-        } else if (store === 'image') {
-          const result = await upload_image(res.assets[0]);
-          if (result) {
-            Alert.alert(
-              'Thông báo',
-              'Bạn đã cập nhận ảnh chấm công thành công!',
-            );
-            setIsUpdated(isUpdated + 1);
-          }
-        }
-      }
-    });
-  };
+  // const getAvatar = async (store: string) => {
+  //   await launchImageLibrary({mediaType: 'photo'}, async res => {
+  //     if (res.didCancel) {
+  //       return;
+  //     }
+  //     if (res.errorCode) {
+  //       console.log('====================================');
+  //       console.log(res.errorMessage);
+  //       console.log('====================================');
+  //       return;
+  //     }
+  //     if (res.assets) {
+  //       if (store === 'avatar') {
+  //         const result = await upload_avatar(res.assets[0]);
+  //         if (result) {
+  //           setIsUpdated(isUpdated + 1);
+  //         }
+  //       } else if (store === 'image') {
+  //         const result = await upload_image(res.assets[0]);
+  //         if (result) {
+  //           Alert.alert(
+  //             'Thông báo',
+  //             'Bạn đã cập nhận ảnh chấm công thành công!',
+  //           );
+  //           setIsUpdated(isUpdated + 1);
+  //         }
+  //       }
+  //     }
+  //   });
+  // };
 
   const handleEditPhone = () => {
     if (userInfo) {
@@ -152,55 +146,55 @@ const SettingScreen = () => {
     setConformPassword('');
   };
 
-  const renderImageModal = () => {
-    return (
-      <Modal
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setImageModal(false)}
-        visible={imageModal}>
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View style={styles.modalContainer}>
-            <View style={styles.modal}>
-              <Text style={styles.modalTitle}>Thay đổi mật khẩu</Text>
-              <View
-                style={{
-                  minHeight: 200,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  padding: 20,
-                }}>
-                {!imageLink ? (
-                  <Text style={styles.text}>
-                    Bạn chưa chọn ảnh để chấm công
-                  </Text>
-                ) : (
-                  <Image
-                    source={{uri: imageLink}}
-                    width={300}
-                    height={300}
-                    borderRadius={20}
-                  />
-                )}
-              </View>
-              <View style={styles.modalButton}>
-                <TouchableOpacity
-                  style={styles.submitButton}
-                  onPress={() => getAvatar('image')}>
-                  <Text style={styles.modalText}>Chọn ảnh</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.cancelButton}
-                  onPress={() => setImageModal(false)}>
-                  <Text style={styles.modalText}>Trở về</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </TouchableWithoutFeedback>
-      </Modal>
-    );
-  };
+  // const renderImageModal = () => {
+  //   return (
+  //     <Modal
+  //       animationType="slide"
+  //       transparent={true}
+  //       onRequestClose={() => setImageModal(false)}
+  //       visible={imageModal}>
+  //       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+  //         <View style={styles.modalContainer}>
+  //           <View style={styles.modal}>
+  //             <Text style={styles.modalTitle}>Thay đổi mật khẩu</Text>
+  //             <View
+  //               style={{
+  //                 minHeight: 200,
+  //                 justifyContent: 'center',
+  //                 alignItems: 'center',
+  //                 padding: 20,
+  //               }}>
+  //               {!imageLink ? (
+  //                 <Text style={styles.text}>
+  //                   Bạn chưa chọn ảnh để chấm công
+  //                 </Text>
+  //               ) : (
+  //                 <Image
+  //                   source={{uri: imageLink}}
+  //                   width={300}
+  //                   height={300}
+  //                   borderRadius={20}
+  //                 />
+  //               )}
+  //             </View>
+  //             <View style={styles.modalButton}>
+  //               <TouchableOpacity
+  //                 style={styles.submitButton}
+  //                 onPress={() => getAvatar('image')}>
+  //                 <Text style={styles.modalText}>Chọn ảnh</Text>
+  //               </TouchableOpacity>
+  //               <TouchableOpacity
+  //                 style={styles.cancelButton}
+  //                 onPress={() => setImageModal(false)}>
+  //                 <Text style={styles.modalText}>Trở về</Text>
+  //               </TouchableOpacity>
+  //             </View>
+  //           </View>
+  //         </View>
+  //       </TouchableWithoutFeedback>
+  //     </Modal>
+  //   );
+  // };
 
   return (
     <SafeAreaView>
@@ -217,11 +211,11 @@ const SettingScreen = () => {
               }
               style={styles.avatar}
             />
-            <TouchableOpacity
+            {/* <TouchableOpacity
               onPress={() => getAvatar('avatar')}
               style={styles.editButton}>
               <Icon name="pencil" size={20} color={'#000'} />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
 
           <View style={styles.contentContainer}>
@@ -240,7 +234,7 @@ const SettingScreen = () => {
               <View style={styles.groupRow}>
                 <Icon name="briefcase" size={20} color={'#000'} />
                 <Text style={styles.label}> Chức vụ:</Text>
-                <Text style={styles.text}>{userInfo?.roleId.typeName}</Text>
+                <Text style={styles.text}>{userInfo?.role.typeName}</Text>
               </View>
 
               <View style={styles.groupRow}>
@@ -311,11 +305,11 @@ const SettingScreen = () => {
             </View>
 
             <View style={styles.buttonGroup}>
-              <TouchableOpacity
+              {/* <TouchableOpacity
                 style={styles.imageButton}
                 onPress={() => setImageModal(true)}>
                 <Text style={styles.buttonText}>Ảnh chấm công</Text>
-              </TouchableOpacity>
+              </TouchableOpacity> */}
 
               <TouchableOpacity
                 style={styles.passButton}
@@ -330,7 +324,7 @@ const SettingScreen = () => {
             </View>
           </View>
 
-          {renderImageModal()}
+          {/* {renderImageModal()} */}
           <Modal
             animationType="slide"
             transparent={true}

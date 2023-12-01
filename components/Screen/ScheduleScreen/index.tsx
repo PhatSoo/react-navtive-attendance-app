@@ -73,12 +73,12 @@ const ScheduleScreen = () => {
 
     for (let i = 0; i < 7; i++) {
       const nextDay = new Date(
-        // nextMonday.getFullYear(),
-        // nextMonday.getMonth(),
-        // nextMonday.getDate() + i,
-        today.getFullYear(),
-        today.getMonth(),
-        today.getDate() + i,
+        nextMonday.getFullYear(),
+        nextMonday.getMonth(),
+        nextMonday.getDate() + i,
+        // today.getFullYear(),
+        // today.getMonth(),
+        // today.getDate() + i,
       );
       const dayString = `${nextDay.toLocaleDateString('vi-VN', {
         weekday: 'long',
@@ -103,12 +103,14 @@ const ScheduleScreen = () => {
           weekday: 'long',
         });
 
-        const shiftName = item.workShift.shiftName;
+        const shiftName = item.workShift.map(
+          (shift: {shiftName: any}) => shift.shiftName,
+        );
 
         if (nextWeek.includes(dayString)) {
           setShiftsInfo(prevState => ({
             ...prevState,
-            [dayString]: [...prevState[dayString], shiftName],
+            [dayString]: [...prevState[dayString], ...shiftName],
           }));
         }
       });
@@ -198,24 +200,30 @@ const ScheduleScreen = () => {
 
   const handleConfirm = async () => {
     const formatDate = (dateStr: string) => {
-      const [day, month, year] = dateStr.split('/');
+      const [, date] = dateStr.split(', ');
+      const [day, month, year] = date.split('/');
       return `${year}-${month}-${day}`;
     };
-    const shiftAttendances = [];
-    // Duyệt qua mỗi ngày trong shiftsInfo
+
+    const groupedShifts: any[] = [];
     for (const [date, shifts] of Object.entries(shiftsInfo)) {
-      // Duyệt qua mỗi ca trong ngày
-      for (const shift of shifts) {
-        // Tạo đối tượng data để gửi lên API
-        const data = {
-          workDate: formatDate(date.split(', ')[1]),
-          workShift: shift,
-          // Thêm các trường khác nếu cần
-        };
-        shiftAttendances.push(data);
+      if (shifts.length > 0) {
+        const formattedDate = formatDate(date);
+        const existingGroup = groupedShifts.find(
+          item => item.workDate === formattedDate,
+        );
+        if (existingGroup) {
+          existingGroup.workShift.push(...shifts);
+        } else {
+          groupedShifts.push({
+            workDate: formattedDate,
+            workShift: shifts,
+          });
+        }
       }
     }
-    const response = await schedule_chosen(shiftAttendances);
+
+    const response = await schedule_chosen(groupedShifts);
     if (response.data.success) {
       Alert.alert('Thông báo', response.data.message);
       setShiftSummaryModalVisible(false);

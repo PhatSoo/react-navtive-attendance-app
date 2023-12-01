@@ -10,7 +10,7 @@ import {API, AVATAR_PATH} from '@env';
 const HomeScreen = ({navigation}: any) => {
   const [userInfo, setUserInfo] = useState({
     name: 'Nguyễn Văn A',
-    roleId: {
+    role: {
       typeName: 'Nhân viên văn phòng',
     },
     isPartTime: false,
@@ -39,7 +39,7 @@ const HomeScreen = ({navigation}: any) => {
           <Text style={styles.infoText}>{userInfo.name}</Text>
           <Text style={styles.positionText}>
             Chức vụ:{' '}
-            <Text style={styles.infoText}> {userInfo.roleId.typeName}</Text>
+            <Text style={styles.infoText}> {userInfo.role.typeName}</Text>
           </Text>
         </View>
         <View style={styles.imageContainer}>

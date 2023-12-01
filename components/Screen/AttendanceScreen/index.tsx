@@ -148,31 +148,31 @@ const Attendance = ({navigation}: any) => {
         try {
           const data = await cameraRef.current?.takePictureAsync(options);
           const base64 = data.base64;
-          const res = await checkRecognize(base64);
-          if (res.exception === null) {
-            setLoading(false);
-            if (res.results[0].similarity > 0.9 && attendanceInfo) {
-              setIsCheckInOK(true);
+          // const res = await checkRecognize(base64);
+          // if (res.exception === null) {
+          //   setLoading(false);
+          //   if (res.results[0].similarity > 0.9 && attendanceInfo) {
+          //     setIsCheckInOK(true);
 
-              // const status = compareHours(
-              //   get_current_time_format(),
-              //   shiftInfo.startTime,
-              //   shiftInfo.endTime,
-              // );
+          //     // const status = compareHours(
+          //     //   get_current_time_format(),
+          //     //   shiftInfo.startTime,
+          //     //   shiftInfo.endTime,
+          //     // );
 
-              const checks = await check(checkType, attendanceInfo.data?._id);
-              if (checks && checks.data.success) {
-                setCheckType('');
-                Alert.alert('Thông báo!', 'Bạn đã chấm công thành công.');
-                return;
-              }
-            }
-            Alert.alert('Thông báo!', 'Bạn đã chấm công thất bại.');
-            return;
-          } else {
-            Alert.alert('Thông báo!', 'Bạn đã chấm công thất bại.');
-            return;
-          }
+          //     const checks = await check(checkType, attendanceInfo.data._id);
+          //     if (checks && checks.data.success) {
+          //       setCheckType('');
+          //       Alert.alert('Thông báo!', 'Bạn đã chấm công thành công.');
+          //       return;
+          //     }
+          //   }
+          //   Alert.alert('Thông báo!', 'Bạn đã chấm công thất bại.');
+          //   return;
+          // } else {
+          //   Alert.alert('Thông báo!', 'Bạn đã chấm công thất bại.');
+          //   return;
+          // }
         } catch (error) {
           console.error('Error taking picture:', error);
         } finally {
@@ -296,23 +296,23 @@ const Attendance = ({navigation}: any) => {
   }, [checkType]);
 
   const handleCheckPress = (cType: string) => {
-    if (attendanceInfo?.success && attendanceInfo.data) {
-      if (cType === 'CheckIn' && attendanceInfo.data.checkInTime) {
-        Alert.alert(
-          'Thông báo',
-          `Bạn đã ${cType}\nVui lòng không chọn lại chức năng này!`,
-        );
-        return;
-      } else if (cType === 'CheckOut' && attendanceInfo.data.checkOutTime) {
-        Alert.alert(
-          'Thông báo',
-          `Bạn đã ${cType}\nVui lòng không chọn lại chức năng này!`,
-        );
-        return;
-      } else {
-        setCheckType(cType);
-      }
-    }
+    // if (attendanceInfo?.success && attendanceInfo.data) {
+    // if (cType === 'CheckIn' && attendanceInfo.data.checkInTime) {
+    //   Alert.alert(
+    //     'Thông báo',
+    //     `Bạn đã ${cType}\nVui lòng không chọn lại chức năng này!`,
+    //   );
+    //   return;
+    // } else if (cType === 'CheckOut' && attendanceInfo.data.checkOutTime) {
+    //   Alert.alert(
+    //     'Thông báo',
+    //     `Bạn đã ${cType}\nVui lòng không chọn lại chức năng này!`,
+    //   );
+    //   return;
+    // } else {
+    setCheckType(cType);
+    // }
+    // }
   };
 
   const renderCheckOptions = () => {
