@@ -24,44 +24,6 @@ export const get_info = async () => {
   return await apiManager.get('/me');
 };
 
-export const upload_avatar = async (data: any) => {
-  const formData = new FormData();
-  formData.append('avatar', {
-    name: data.fileName,
-    uri: data.uri,
-    type: data.type,
-  });
-
-  const response = await apiManager.post('/me/avatar', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  });
-  if (response.status === 204) {
-    return true;
-  }
-  return false;
-};
-
-export const upload_image = async (data: any) => {
-  const formData = new FormData();
-  formData.append('image', {
-    name: data.fileName,
-    uri: data.uri,
-    type: data.type,
-  });
-
-  const response = await apiManager.post('/me/image', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  });
-  if (response.status === 204) {
-    return true;
-  }
-  return false;
-};
-
 export const upload_info = async (data: any) => {
   try {
     return await apiManager.put('/me', data);
@@ -98,7 +60,6 @@ export const get_attendance = async () => {
 export const attendance = async () => {
   try {
     return await apiManager.get('/me/image');
-    // return;
   } catch (error: any) {
     return error.response;
   }
@@ -113,12 +74,14 @@ export const get_existing_shift = async (shiftId: string) => {
   }
 };
 
-export const check = async (checkType: string, attendanceId: string) => {
+export const check = async (formData: any) => {
   try {
-    const data = {checkType, attendanceId};
-
-    return await apiManager.put('me/check', data);
+    return await apiManager.put('me/check', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
   } catch (error: any) {
-    console.log(error.response.data.message);
+    console.log(error);
   }
 };

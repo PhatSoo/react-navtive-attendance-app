@@ -9,54 +9,10 @@ import {
 import LinearGradient from 'react-native-linear-gradient';
 import {styles} from './styles';
 import {RNCamera} from 'react-native-camera';
-import FaceSDK, {
-  ImageType,
-  MatchFacesImage,
-  MatchFacesRequest,
-  MatchFacesResponse,
-} from '@regulaforensics/react-native-face-api';
 
 import LottieView from 'lottie-react-native';
-import RNFetchBlob from 'rn-fetch-blob';
-import {attendance, check, get_existing_shift} from '../../../api/users';
-import {API, ATTENDANCE_PATH} from '@env';
+import {check, get_existing_shift} from '../../../api/users';
 import {get_current_shift} from '../../../api/shifts';
-// import {get_current_time_format} from '../../../utils';
-
-// interface BoxState {
-//   boxes: {
-//     width: any;
-//     height: any;
-//     x: any;
-//     y: any;
-//     yawAngle: any;
-//     rollAngle: any;
-//   };
-// }
-
-// Draw a box when face detected
-// const bound = ({
-//   width,
-//   height,
-//   x,
-//   y,
-// }: {
-//   width: number;
-//   height: number;
-//   x: number;
-//   y: number;
-// }): ViewStyle => {
-//   return {
-//     position: 'absolute',
-//     top: y,
-//     left: x,
-//     height,
-//     width,
-//     borderWidth: 5,
-//     borderColor: 'red',
-//     zIndex: 300,
-//   };
-// };
 
 type Shift = {
   _id: string;
@@ -74,8 +30,7 @@ type Attendance = {
 
 const Attendance = ({navigation}: any) => {
   const type = RNCamera.Constants.Type.front;
-  // const [box, setBox] = useState<BoxState | null>(null);
-  const cameraRef = useRef(null);
+  let cameraRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const [isCheckInOK, setIsCheckInOK] = useState(false);
   const [isTakingPicture, setIsTakingPicture] = useState(false);
@@ -86,93 +41,51 @@ const Attendance = ({navigation}: any) => {
     data?: Attendance;
     message?: string;
   } | null>();
-  // const [status, setStatus] = useState('');
 
-  const checkRecognize = (faceCapture: string) => {
-    return new Promise(async (resolve, reject) => {
-      const result = await attendance();
-      const imageURL = API + '/' + ATTENDANCE_PATH + '/' + result.data.data;
-      let imageBase64 = '';
-      await RNFetchBlob.fetch('GET', imageURL)
-        .then(res => {
-          imageBase64 = res.base64();
-        })
-        .catch(err => console.error(err));
+  const sendImage = async (data: any) => {
+    // Gửi ảnh lên server
+    const uri = data.uri;
+    const parts = uri.split('/');
+    const filename = parts[parts.length - 1];
 
-      const firstImage = new MatchFacesImage();
-      firstImage.imageType = ImageType.PRINTED;
-      firstImage.bitmap = imageBase64;
+    try {
+      const formData = new FormData();
+      formData.append('image', {
+        name: filename,
+        uri,
+        type: 'image/jpeg', // Loại ảnh bạn muốn gửi
+      });
+      formData.append('checkType', checkType);
+      formData.append('attendanceId', attendanceInfo?.data?._id);
 
-      const secondImage = new MatchFacesImage();
-      secondImage.imageType = ImageType.PRINTED;
-      secondImage.bitmap = faceCapture;
+      const result = await check(formData);
 
-      const request = new MatchFacesRequest();
-      request.images = [firstImage, secondImage];
-
-      FaceSDK.matchFaces(
-        JSON.stringify(request),
-        matchFacesResponse => {
-          const response = MatchFacesResponse.fromJson(
-            JSON.parse(matchFacesResponse),
-          );
-          resolve(response);
-        },
-        e => {
-          reject(e);
-        },
-      );
-    });
+      setLoading(false);
+      if (result?.data.success) {
+        setIsCheckInOK(true);
+        Alert.alert('Thông báo', 'Bạn đã chấm công thành công');
+      } else {
+        Alert.alert('Thông báo', 'Bạn đã chấm công thất bại');
+      }
+    } catch (error) {
+      console.error('Upload failed:', error);
+    }
   };
 
   const handleFace = async ({faces}: any) => {
     if (faces.length > 0 && !isTakingPicture) {
       setIsTakingPicture(true);
-      // setBox({
-      //   boxes: {
-      //     width: faces[0].bounds.size.width,
-      //     height: faces[0].bounds.size.height,
-      //     x: faces[0].bounds.origin.x,
-      //     y: faces[0].bounds.origin.y,
-      //     yawAngle: faces[0].yawAngle,
-      //     rollAngle: faces[0].rollAngle,
-      //   },
-      // });
+
       if (cameraRef.current) {
         const options = {
           pauseAfterCapture: true,
-          base64: true,
-          doNotSave: true,
-          quality: 0.5,
+          base64: false,
+          quality: 1,
         };
         try {
           const data = await cameraRef.current?.takePictureAsync(options);
-          const base64 = data.base64;
-          // const res = await checkRecognize(base64);
-          // if (res.exception === null) {
-          //   setLoading(false);
-          //   if (res.results[0].similarity > 0.9 && attendanceInfo) {
-          //     setIsCheckInOK(true);
 
-          //     // const status = compareHours(
-          //     //   get_current_time_format(),
-          //     //   shiftInfo.startTime,
-          //     //   shiftInfo.endTime,
-          //     // );
-
-          //     const checks = await check(checkType, attendanceInfo.data._id);
-          //     if (checks && checks.data.success) {
-          //       setCheckType('');
-          //       Alert.alert('Thông báo!', 'Bạn đã chấm công thành công.');
-          //       return;
-          //     }
-          //   }
-          //   Alert.alert('Thông báo!', 'Bạn đã chấm công thất bại.');
-          //   return;
-          // } else {
-          //   Alert.alert('Thông báo!', 'Bạn đã chấm công thất bại.');
-          //   return;
-          // }
+          sendImage(data);
         } catch (error) {
           console.error('Error taking picture:', error);
         } finally {
@@ -180,10 +93,6 @@ const Attendance = ({navigation}: any) => {
         }
       }
     }
-    // else {
-    //   setBox(null);
-    // }
-    // }
   };
 
   const renderCamera = () => {
@@ -197,17 +106,8 @@ const Attendance = ({navigation}: any) => {
             style={styles.camera}
             onFacesDetected={handleFace}
           />
-          {/* {box && (
-    <View
-      style={bound({
-        width: box.boxes.width,
-        height: box.boxes.height,
-        x: box.boxes.x,
-        y: box.boxes.y,
-      })}
-    />
-  )} */}
         </View>
+
         <View style={styles.bottom}>
           {loading ? (
             <>
@@ -238,7 +138,10 @@ const Attendance = ({navigation}: any) => {
           <View style={styles.buttonGroup}>
             <TouchableOpacity
               style={styles.button}
-              onPress={() => setCheckType('')}>
+              onPress={() => {
+                setCheckType('');
+                setLoading(true);
+              }}>
               <Text style={styles.text}>Thoát</Text>
             </TouchableOpacity>
           </View>
@@ -247,35 +150,8 @@ const Attendance = ({navigation}: any) => {
     );
   };
 
-  // const compareHours = (
-  //   currentTime: string,
-  //   startTime: string,
-  //   endTime: string,
-  // ) => {
-  //   // Chuyển đổi chuỗi thời gian thành Date object
-  //   const current = new Date('1970-01-01T' + currentTime + 'Z');
-  //   const start = new Date('1970-01-01T' + startTime + 'Z');
-  //   const end = new Date('1970-01-01T' + endTime + 'Z');
-
-  //   if (checkType === 'CheckIn') {
-  //     if (current > start) {
-  //       return 'LATE';
-  //     } else {
-  //       return 'WORKING';
-  //     }
-  //   } else if (checkType === 'CheckOut') {
-  //     if (current < end) {
-  //       return 'EARLY';
-  //     } else {
-  //       return 'DONE';
-  //     }
-  //   } else {
-  //     return 'NULL';
-  //   }
-  // };
-
+  // Get info about current shift
   useEffect(() => {
-    // Get info about current shift
     if (!checkType) {
       const get_currentShift = async () => {
         const currentShift = await get_current_shift();
@@ -296,23 +172,23 @@ const Attendance = ({navigation}: any) => {
   }, [checkType]);
 
   const handleCheckPress = (cType: string) => {
-    // if (attendanceInfo?.success && attendanceInfo.data) {
-    // if (cType === 'CheckIn' && attendanceInfo.data.checkInTime) {
-    //   Alert.alert(
-    //     'Thông báo',
-    //     `Bạn đã ${cType}\nVui lòng không chọn lại chức năng này!`,
-    //   );
-    //   return;
-    // } else if (cType === 'CheckOut' && attendanceInfo.data.checkOutTime) {
-    //   Alert.alert(
-    //     'Thông báo',
-    //     `Bạn đã ${cType}\nVui lòng không chọn lại chức năng này!`,
-    //   );
-    //   return;
-    // } else {
-    setCheckType(cType);
-    // }
-    // }
+    if (attendanceInfo?.success && attendanceInfo.data) {
+      if (cType === 'CheckIn' && attendanceInfo.data.checkInTime) {
+        Alert.alert(
+          'Thông báo',
+          `Bạn đã ${cType}\nVui lòng không chọn lại chức năng này!`,
+        );
+        return;
+      } else if (cType === 'CheckOut' && attendanceInfo.data.checkOutTime) {
+        Alert.alert(
+          'Thông báo',
+          `Bạn đã ${cType}\nVui lòng không chọn lại chức năng này!`,
+        );
+        return;
+      } else {
+        setCheckType(cType);
+      }
+    }
   };
 
   const renderCheckOptions = () => {

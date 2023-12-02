@@ -13,7 +13,6 @@ import {Calendar} from 'react-native-calendars';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {styles} from './styles';
 import {get_attendance} from '../../../api/users';
-import {get_current_shift} from '../../../api/shifts';
 
 enum Status {
   NULL = 'NULL', // Default
@@ -29,9 +28,7 @@ type Attendance = {
   _id: String;
   checkInTime: Date;
   checkOutTime: Date;
-  shiftRegistration: {
-    workDate: Date;
-  };
+  workDate: Date;
   workShift: {
     shiftName: String;
   };
@@ -56,12 +53,12 @@ const CalendarScreen = ({navigation}: any) => {
       const list: any = [];
       const res = await get_attendance();
 
-      const currentShift = await get_current_shift();
+      // const currentShift = await get_current_shift();
 
       if (res.data.success) {
         // Get data from API and push to "list"
         res.data.data.map((item: Attendance) => {
-          const date = new Date(item.shiftRegistration.workDate);
+          const date = new Date(item.workDate);
           const formattedDate = date.toISOString().slice(0, 10);
 
           const data = {
@@ -194,13 +191,17 @@ const CalendarScreen = ({navigation}: any) => {
                         <Text>{item.shift}:</Text>
                         <View style={styles.modalGroup}>
                           <Text style={styles.modalLabel}>Check in:</Text>
-                          <Text style={styles.modalText}>{item.checkIn}</Text>
+                          <Text style={styles.modalText}>
+                            {new Date(item.checkIn).toLocaleTimeString()}
+                          </Text>
                         </View>
                         <View style={styles.separate} />
 
                         <View style={styles.modalGroup}>
                           <Text style={styles.modalLabel}>Check out:</Text>
-                          <Text style={styles.modalText}>{item.checkOut}</Text>
+                          <Text style={styles.modalText}>
+                            {new Date(item.checkOut).toLocaleTimeString()}
+                          </Text>
                         </View>
                         <View style={styles.separate} />
 

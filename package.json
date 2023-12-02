@@ -29,6 +29,7 @@
     "react-native-calendars": "^1.1301.0",
     "react-native-camera": "^4.2.1",
     "react-native-dotenv": "^3.4.9",
+    "react-native-image-crop-picker": "^0.40.2",
     "react-native-image-picker": "^7.0.1",
     "react-native-linear-gradient": "^2.8.3",
     "react-native-paper": "^5.11.1",
