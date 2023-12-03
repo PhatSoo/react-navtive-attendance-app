@@ -1,5 +1,4 @@
 import React, {useEffect, useState} from 'react';
-import {API, AVATAR_PATH} from '@env';
 import {
   Alert,
   Image,
@@ -48,8 +47,7 @@ const SettingScreen = () => {
       if (res?.data.success) {
         setUserInfo(res.data.data);
         if (userInfo && userInfo.avatar) {
-          const avatarPath = API + '/' + AVATAR_PATH + '/' + userInfo.avatar;
-          setSelectedImage(avatarPath);
+          setSelectedImage(userInfo.avatar);
         }
       }
     };

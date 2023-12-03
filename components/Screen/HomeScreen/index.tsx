@@ -5,7 +5,6 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import {styles} from './styles';
 import LinearGradient from 'react-native-linear-gradient';
 import {get_info} from '../../../api/users';
-import {API, AVATAR_PATH} from '@env';
 
 const HomeScreen = ({navigation}: any) => {
   const [userInfo, setUserInfo] = useState({
@@ -24,8 +23,7 @@ const HomeScreen = ({navigation}: any) => {
       if (res?.data.success) {
         setUserInfo(res.data.data);
         if (userInfo && userInfo.avatar) {
-          const imagePath = API + '/' + AVATAR_PATH + '/' + userInfo.avatar;
-          setSelectedImage(imagePath);
+          setSelectedImage(userInfo.avatar);
         }
       }
     };
