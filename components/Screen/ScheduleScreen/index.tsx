@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import {styles} from './styles';
-import {Checkbox} from 'react-native-paper';
+import {CheckBox} from '@rneui/themed';
 import {get_shift} from '../../../api/shifts';
 import {get_schedule, schedule_chosen} from '../../../api/users';
 
@@ -177,7 +177,7 @@ const ScheduleScreen = () => {
                 <View
                   key={index}
                   style={{flexDirection: 'row', alignItems: 'center'}}>
-                  <Checkbox
+                  {/* <Checkbox
                     status={
                       shiftsInfo[selectedDay].includes(shift.shiftName)
                         ? 'checked'
@@ -187,6 +187,13 @@ const ScheduleScreen = () => {
                       handleCheckboxPress(shift.shiftName, selectedDay)
                     }
                     color="pink"
+                  /> */}
+                  <CheckBox
+                    checked={shiftsInfo[selectedDay].includes(shift.shiftName)}
+                    onPress={() =>
+                      handleCheckboxPress(shift.shiftName, selectedDay)
+                    }
+                    checkedColor="pink"
                   />
                   <Text>{shift.shiftName}</Text>
                 </View>

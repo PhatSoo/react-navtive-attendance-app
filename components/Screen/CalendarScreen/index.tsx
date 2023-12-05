@@ -18,16 +18,20 @@ enum Status {
   NULL = 'NULL', // Default
   WORKING = 'WORKING', // Check in
   LEAVE = 'LEAVE', // Leave request
-  UNAUTHORIZED_LEAVE = 'UNAUTHORIZED_LEAVE', // Leave not request
-  LATE = 'LATE', // Check in late
-  EARLY = 'EARLY', // Check out early
-  BUSINESS_TRIP = 'BUSINESS_TRIP',
+  DONE = 'DONE',
 }
 
 type Attendance = {
   _id: String;
-  checkInTime: Date;
-  checkOutTime: Date;
+  employee: {
+    isPartTime: boolean;
+  };
+  checkIn: {
+    time: string;
+  };
+  checkOut: {
+    time: string;
+  };
   workDate: Date;
   workShift: {
     shiftName: String;
@@ -46,6 +50,7 @@ const CalendarScreen = ({navigation}: any) => {
   } | null>({});
   const [dayDetails, setDayDetails] = useState([]);
   const [dateMarked, setDateMarked] = useState({});
+  const [isPartTime, setIsPartTime] = useState(false);
 
   // Get attendance
   useEffect(() => {
@@ -53,19 +58,18 @@ const CalendarScreen = ({navigation}: any) => {
       const list: any = [];
       const res = await get_attendance();
 
-      // const currentShift = await get_current_shift();
-
       if (res.data.success) {
         // Get data from API and push to "list"
         res.data.data.map((item: Attendance) => {
           const date = new Date(item.workDate);
           const formattedDate = date.toISOString().slice(0, 10);
+          setIsPartTime(item.employee.isPartTime);
 
           const data = {
             id: item._id,
             formattedDate,
-            checkIn: item.checkInTime,
-            checkOut: item.checkOutTime,
+            checkIn: item.checkIn.time,
+            checkOut: item.checkOut.time,
             status: item.status,
             shift: item.workShift.shiftName,
           };
@@ -131,7 +135,6 @@ const CalendarScreen = ({navigation}: any) => {
           result[key] = listSchedule[key];
         }
       }
-
       if (result.length === 0) {
         Alert.alert(
           'Thông báo',
@@ -169,7 +172,7 @@ const CalendarScreen = ({navigation}: any) => {
       const secondsDiff = diffInSeconds % 60;
       return `${hoursDiff} giờ, ${minutesDiff} phút, ${secondsDiff} giây`;
     }
-    return '';
+    return 'N/A';
   };
 
   const renderModalDetails = () => {
@@ -192,7 +195,9 @@ const CalendarScreen = ({navigation}: any) => {
                         <View style={styles.modalGroup}>
                           <Text style={styles.modalLabel}>Check in:</Text>
                           <Text style={styles.modalText}>
-                            {new Date(item.checkIn).toLocaleTimeString()}
+                            {item.checkIn
+                              ? new Date(item.checkIn).toLocaleTimeString()
+                              : 'N/A'}
                           </Text>
                         </View>
                         <View style={styles.separate} />
@@ -200,7 +205,9 @@ const CalendarScreen = ({navigation}: any) => {
                         <View style={styles.modalGroup}>
                           <Text style={styles.modalLabel}>Check out:</Text>
                           <Text style={styles.modalText}>
-                            {new Date(item.checkOut).toLocaleTimeString()}
+                            {item.checkOut
+                              ? new Date(item.checkOut).toLocaleTimeString()
+                              : 'N/A'}
                           </Text>
                         </View>
                         <View style={styles.separate} />
@@ -276,7 +283,7 @@ const CalendarScreen = ({navigation}: any) => {
             <TouchableOpacity style={styles.button} onPress={handleOpenDetails}>
               <Text style={styles.buttonText}>Xem chi tiết</Text>
             </TouchableOpacity>
-            {new Date(daySelected) > new Date() && (
+            {new Date(daySelected) > new Date() && !isPartTime && (
               <TouchableOpacity style={styles.button} onPress={handleForm}>
                 <Text style={styles.buttonText}>Làm đơn xin phép</Text>
               </TouchableOpacity>

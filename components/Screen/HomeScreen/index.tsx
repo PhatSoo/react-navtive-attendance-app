@@ -5,16 +5,18 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import {styles} from './styles';
 import LinearGradient from 'react-native-linear-gradient';
 import {get_info} from '../../../api/users';
+import {IEmployee} from '../../../types/interface';
 
 const HomeScreen = ({navigation}: any) => {
-  const [userInfo, setUserInfo] = useState({
-    name: 'Nguyễn Văn A',
-    role: {
-      typeName: 'Nhân viên văn phòng',
-    },
-    isPartTime: false,
-    avatar: '',
-  });
+  const [userInfo, setUserInfo] = useState<IEmployee>();
+  //   {
+  //   name: 'Nguyễn Văn A',
+  //   role: {
+  //     typeName: 'Nhân viên văn phòng',
+  //   },
+  //   isPartTime: false,
+  //   avatar: '',
+  // }
   const [selectedImage, setSelectedImage] = useState('');
 
   useEffect(() => {
@@ -34,13 +36,14 @@ const HomeScreen = ({navigation}: any) => {
     <LinearGradient colors={['#ECFCFF', '#B2FCFF']} style={styles.container}>
       <View style={styles.infoContainer}>
         <View style={styles.textContainer}>
-          <Text style={styles.infoText}>{userInfo.name}</Text>
+          <Text style={styles.infoText}>{userInfo?.name}</Text>
           <Text style={styles.positionText}>
             Chức vụ:{' '}
-            <Text style={styles.infoText}> {userInfo.role.typeName}</Text>
+            <Text style={styles.infoText}> {userInfo?.role.typeName}</Text>
           </Text>
         </View>
         <View style={styles.imageContainer}>
+          {/* <Ava */}
           <Image
             source={
               selectedImage
@@ -65,7 +68,7 @@ const HomeScreen = ({navigation}: any) => {
           <Icon name="calendar" size={30} color="#000" />
           <Text style={styles.buttonText}>Xem lịch</Text>
         </TouchableOpacity>
-        {userInfo.isPartTime ? (
+        {userInfo?.isPartTime ? (
           <TouchableOpacity
             style={styles.button}
             onPress={() => navigation.navigate('Schedule')}>

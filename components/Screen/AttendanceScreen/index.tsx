@@ -23,14 +23,18 @@ type Shift = {
 
 type Attendance = {
   _id: string;
-  checkInTime: string;
-  checkOutTime: string;
+  checkIn: {
+    time: string;
+  };
+  checkOut: {
+    time: string;
+  };
   status: string;
 };
 
 const Attendance = ({navigation}: any) => {
   const type = RNCamera.Constants.Type.front;
-  let cameraRef = useRef(null);
+  let cameraRef = useRef<RNCamera>(null);
   const [loading, setLoading] = useState(true);
   const [isCheckInOK, setIsCheckInOK] = useState(false);
   const [isTakingPicture, setIsTakingPicture] = useState(false);
@@ -72,6 +76,10 @@ const Attendance = ({navigation}: any) => {
     }
   };
 
+  console.log('====================================');
+  console.log(cameraRef);
+  console.log('====================================');
+
   const handleFace = async ({faces}: any) => {
     if (faces.length > 0 && !isTakingPicture) {
       setIsTakingPicture(true);
@@ -83,7 +91,7 @@ const Attendance = ({navigation}: any) => {
           quality: 1,
         };
         try {
-          const data = await cameraRef.current?.takePictureAsync(options);
+          const data = await cameraRef.current.takePictureAsync(options);
 
           sendImage(data);
         } catch (error) {
@@ -173,13 +181,13 @@ const Attendance = ({navigation}: any) => {
 
   const handleCheckPress = (cType: string) => {
     if (attendanceInfo?.success && attendanceInfo.data) {
-      if (cType === 'CheckIn' && attendanceInfo.data.checkInTime) {
+      if (cType === 'CheckIn' && attendanceInfo.data.checkIn.time) {
         Alert.alert(
           'Thông báo',
           `Bạn đã ${cType}\nVui lòng không chọn lại chức năng này!`,
         );
         return;
-      } else if (cType === 'CheckOut' && attendanceInfo.data.checkOutTime) {
+      } else if (cType === 'CheckOut' && attendanceInfo.data.checkOut.time) {
         Alert.alert(
           'Thông báo',
           `Bạn đã ${cType}\nVui lòng không chọn lại chức năng này!`,
@@ -219,14 +227,14 @@ const Attendance = ({navigation}: any) => {
               <Text style={styles.title}>Thông tin liên quan</Text>
               <Text style={styles.text}>
                 Check-in:{' '}
-                {attendanceInfo?.data && attendanceInfo?.data.checkInTime
-                  ? attendanceInfo.data.checkInTime
+                {attendanceInfo?.data && attendanceInfo?.data.checkIn.time
+                  ? attendanceInfo.data.checkIn.time
                   : 'NULL'}
               </Text>
               <Text style={styles.text}>
                 Check-out:{' '}
-                {attendanceInfo?.data && attendanceInfo?.data.checkOutTime
-                  ? attendanceInfo.data.checkOutTime
+                {attendanceInfo?.data && attendanceInfo?.data.checkOut.time
+                  ? attendanceInfo.data.checkOut.time
                   : 'NULL'}
               </Text>
             </View>
