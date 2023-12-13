@@ -6,3 +6,10 @@ export interface IEmployee {
   isPartTime: boolean;
   avatar: string;
 }
+
+export interface IForm {
+  _id: string;
+  status: string;
+  startDate: Date;
+  endDate: Date;
+}

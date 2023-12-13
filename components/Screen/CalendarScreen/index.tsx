@@ -13,6 +13,7 @@ import {Calendar} from 'react-native-calendars';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {styles} from './styles';
 import {get_attendance} from '../../../api/users';
+import moment from 'moment';
 
 enum Status {
   NULL = 'NULL', // Default
@@ -33,7 +34,7 @@ type Attendance = {
     time: string;
   };
   workDate: Date;
-  workShift: {
+  workShift?: {
     shiftName: String;
   };
   status: Status;
@@ -62,7 +63,7 @@ const CalendarScreen = ({navigation}: any) => {
         // Get data from API and push to "list"
         res.data.data.map((item: Attendance) => {
           const date = new Date(item.workDate);
-          const formattedDate = date.toISOString().slice(0, 10);
+          const formattedDate = moment(date).format('YYYY-MM-DD');
           setIsPartTime(item.employee.isPartTime);
 
           const data = {
@@ -71,7 +72,7 @@ const CalendarScreen = ({navigation}: any) => {
             checkIn: item.checkIn.time,
             checkOut: item.checkOut.time,
             status: item.status,
-            shift: item.workShift.shiftName,
+            shift: item.workShift ? item.workShift.shiftName : null,
           };
 
           list.push(data);
@@ -148,28 +149,16 @@ const CalendarScreen = ({navigation}: any) => {
   };
 
   const countTotalTime = (checkIn: string, checkOut: string) => {
-    // Phân tách chuỗi thành giờ, phút, giây và chuyển đổi sang số giây
-    const convertToSeconds = (timeString: string) => {
-      if (timeString) {
-        const [hours, minutes, seconds] = timeString
-          .split(':')
-          .map((x: string) => parseInt(x, 10));
-        return hours * 3600 + minutes * 60 + seconds;
-      }
-      return 0;
-    };
-
     if (checkIn && checkOut) {
-      const time1InSeconds = convertToSeconds(checkIn);
-      const time2InSeconds = convertToSeconds(checkOut);
+      const checkInDate = new Date(checkIn);
+      const checkOutDate = new Date(checkOut);
 
-      // Tính chênh lệch giữa hai thời gian
-      const diffInSeconds = Math.abs(time2InSeconds - time1InSeconds);
+      const diffInSeconds =
+        Math.abs(checkOutDate.getTime() - checkInDate.getTime()) / 1000;
 
-      // Chuyển đổi chênh lệch thành giờ, phút, giây
       const hoursDiff = Math.floor(diffInSeconds / 3600);
       const minutesDiff = Math.floor((diffInSeconds % 3600) / 60);
-      const secondsDiff = diffInSeconds % 60;
+      const secondsDiff = Math.round(diffInSeconds % 60);
       return `${hoursDiff} giờ, ${minutesDiff} phút, ${secondsDiff} giây`;
     }
     return 'N/A';
@@ -191,7 +180,7 @@ const CalendarScreen = ({navigation}: any) => {
                   {dayDetails &&
                     dayDetails.map((item: any) => (
                       <View key={item.id}>
-                        <Text>{item.shift}:</Text>
+                        <Text>{item.shift}</Text>
                         <View style={styles.modalGroup}>
                           <Text style={styles.modalLabel}>Check in:</Text>
                           <Text style={styles.modalText}>

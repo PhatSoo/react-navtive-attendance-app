@@ -11,8 +11,14 @@ import {styles} from './styles';
 import {RNCamera} from 'react-native-camera';
 
 import LottieView from 'lottie-react-native';
-import {check, get_existing_shift} from '../../../api/users';
+import {
+  check,
+  get_existing_shift,
+  get_info,
+  get_time_of_fulltime,
+} from '../../../api/users';
 import {get_current_shift} from '../../../api/shifts';
+import moment from 'moment';
 
 type Shift = {
   _id: string;
@@ -23,6 +29,10 @@ type Shift = {
 
 type Attendance = {
   _id: string;
+  employee: {
+    _id: string;
+    isPartTime: boolean;
+  };
   checkIn: {
     time: string;
   };
@@ -45,6 +55,59 @@ const Attendance = ({navigation}: any) => {
     data?: Attendance;
     message?: string;
   } | null>();
+  const [isPartTime, setIsPartTime] = useState(false);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await get_info();
+      if (res?.data.success) {
+        setIsPartTime(res.data.data.isPartTime);
+      }
+    };
+    fetchData();
+  }, []);
+
+  // Get info about current shift
+  useEffect(() => {
+    if (!checkType) {
+      if (isPartTime) {
+        const get_currentShift = async () => {
+          const currentShift = await get_current_shift();
+          if (currentShift && currentShift.success) {
+            setShiftInfo(currentShift.data);
+
+            const isAttendance = await get_existing_shift(
+              currentShift.data._id,
+            );
+
+            if (isAttendance && isAttendance.success) {
+              setAttendanceInfo({success: true, data: {...isAttendance.data}});
+            } else {
+              setAttendanceInfo({success: false, message: isAttendance});
+            }
+          }
+        };
+        get_currentShift();
+      } else {
+        const get_fulltime_shift = async () => {
+          const fulltimeShift: {startTime: string; endTime: string} =
+            await get_time_of_fulltime();
+
+          setShiftInfo({...fulltimeShift, _id: 'null', shiftName: ''});
+
+          const isAttendance = await get_existing_shift('null');
+
+          if (isAttendance && isAttendance.success) {
+            setAttendanceInfo({success: true, data: {...isAttendance.data}});
+          } else {
+            setAttendanceInfo({success: false, message: isAttendance});
+          }
+        };
+
+        get_fulltime_shift();
+      }
+    }
+  }, [checkType, isPartTime]);
 
   const sendImage = async (data: any) => {
     // Gửi ảnh lên server
@@ -75,10 +138,6 @@ const Attendance = ({navigation}: any) => {
       console.error('Upload failed:', error);
     }
   };
-
-  console.log('====================================');
-  console.log(cameraRef);
-  console.log('====================================');
 
   const handleFace = async ({faces}: any) => {
     if (faces.length > 0 && !isTakingPicture) {
@@ -158,27 +217,6 @@ const Attendance = ({navigation}: any) => {
     );
   };
 
-  // Get info about current shift
-  useEffect(() => {
-    if (!checkType) {
-      const get_currentShift = async () => {
-        const currentShift = await get_current_shift();
-        if (currentShift && currentShift.success) {
-          setShiftInfo(currentShift.data);
-
-          const isAttendance = await get_existing_shift(currentShift.data._id);
-
-          if (isAttendance && isAttendance.success) {
-            setAttendanceInfo({success: true, data: {...isAttendance.data}});
-          } else {
-            setAttendanceInfo({success: false, message: isAttendance});
-          }
-        }
-      };
-      get_currentShift();
-    }
-  }, [checkType]);
-
   const handleCheckPress = (cType: string) => {
     if (attendanceInfo?.success && attendanceInfo.data) {
       if (cType === 'CheckIn' && attendanceInfo.data.checkIn.time) {
@@ -204,22 +242,43 @@ const Attendance = ({navigation}: any) => {
       <View style={styles.container}>
         {shiftInfo ? (
           <>
-            <View style={styles.section}>
-              <Text style={styles.title}>Ca hiện tại</Text>
-              <Text style={styles.text}>{shiftInfo.shiftName}</Text>
-            </View>
+            {isPartTime ? (
+              <View style={styles.section}>
+                <Text style={styles.title}>Ca hiện tại</Text>
+                <Text style={styles.text}>{shiftInfo.shiftName}</Text>
+              </View>
+            ) : (
+              <View>
+                <Text style={styles.title}>Ngày hiện tại</Text>
+                <Text style={styles.text}>
+                  {moment(new Date()).format('DD-MM-YYYY')}
+                </Text>
+              </View>
+            )}
 
             <View style={styles.separator} />
 
-            <View style={styles.section}>
-              <Text style={styles.title}>Thông tin ca làm</Text>
-              <Text style={styles.text}>
-                Thời gian bắt đầu: {shiftInfo.startTime.toString()}h
-              </Text>
-              <Text style={styles.text}>
-                Thời gian kết thúc: {shiftInfo.endTime.toString()}h
-              </Text>
-            </View>
+            {isPartTime ? (
+              <View style={styles.section}>
+                <Text style={styles.title}>Thông tin ca làm</Text>
+                <Text style={styles.text}>
+                  Thời gian bắt đầu: {shiftInfo.startTime.toString()}h
+                </Text>
+                <Text style={styles.text}>
+                  Thời gian kết thúc: {shiftInfo.endTime.toString()}h
+                </Text>
+              </View>
+            ) : (
+              <View style={styles.section}>
+                <Text style={styles.title}>Thông tin ca làm</Text>
+                <Text style={styles.text}>
+                  Thời gian bắt đầu: {shiftInfo.startTime.toString()}h
+                </Text>
+                <Text style={styles.text}>
+                  Thời gian kết thúc: {shiftInfo.endTime.toString()}h
+                </Text>
+              </View>
+            )}
 
             <View style={styles.separator} />
 

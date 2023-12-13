@@ -1,22 +1,15 @@
 import React, {useEffect, useState} from 'react';
-import {View, Text, TouchableOpacity, Image} from 'react-native';
+import {View, TouchableOpacity} from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 import {styles} from './styles';
 import LinearGradient from 'react-native-linear-gradient';
 import {get_info} from '../../../api/users';
 import {IEmployee} from '../../../types/interface';
+import {Avatar, Text} from '@rneui/themed';
 
 const HomeScreen = ({navigation}: any) => {
   const [userInfo, setUserInfo] = useState<IEmployee>();
-  //   {
-  //   name: 'Nguyễn Văn A',
-  //   role: {
-  //     typeName: 'Nhân viên văn phòng',
-  //   },
-  //   isPartTime: false,
-  //   avatar: '',
-  // }
   const [selectedImage, setSelectedImage] = useState('');
 
   useEffect(() => {
@@ -43,14 +36,14 @@ const HomeScreen = ({navigation}: any) => {
           </Text>
         </View>
         <View style={styles.imageContainer}>
-          {/* <Ava */}
-          <Image
+          <Avatar
+            size={120}
+            rounded
             source={
               selectedImage
                 ? {uri: selectedImage}
                 : require('../../../assets/img/avatar.png')
             }
-            style={styles.avatar}
           />
         </View>
       </View>

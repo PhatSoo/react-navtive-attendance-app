@@ -85,3 +85,28 @@ export const check = async (formData: any) => {
     console.log(error);
   }
 };
+
+export const sendFormRequest = async (formData: any) => {
+  try {
+    return await apiManager.post('me/form', formData);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const getOldRequest = async () => {
+  try {
+    return await apiManager.get('me/form');
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const get_time_of_fulltime = async () => {
+  try {
+    const res = await apiManager.get('api/settings');
+    return res.data.data.workHours;
+  } catch (error) {
+    console.log(error);
+  }
+};

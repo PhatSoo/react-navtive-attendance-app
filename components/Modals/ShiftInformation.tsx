@@ -44,10 +44,6 @@ const ShiftInformation = () => {
               </Text>
             ))}
 
-          <Text style={styles.note}>
-            Lưu ý: nếu không chọn thì mặc định nhân viên sẽ rảnh toàn bộ ngày.
-          </Text>
-          <Text> - Nếu không làm thì cứ bấm xác nhận.</Text>
           <Text>
             - Thời gian kết thúc là lúc{' '}
             <Text style={{fontWeight: 'bold'}}>16h30p</Text> ngày{' '}

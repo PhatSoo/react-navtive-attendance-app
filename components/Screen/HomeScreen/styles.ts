@@ -41,17 +41,6 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     marginRight: 10,
   },
-  avatar: {
-    // width: 120,
-    // height: 120,
-    borderRadius: 100,
-    // marginTop: 20,
-    borderWidth: 2,
-    // borderColor: 'white',
-    width: '100%',
-    height: '100%',
-    resizeMode: 'center',
-  },
   buttonContainer: {
     height: (windowHeight / 4) * 3,
     flexDirection: 'row',

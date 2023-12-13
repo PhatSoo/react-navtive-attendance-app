@@ -5,9 +5,11 @@ export const styles = StyleSheet.create({
     height: '100%',
     paddingHorizontal: 15,
     paddingTop: 10,
+    justifyContent: 'space-around',
   },
   wrapper: {
     marginVertical: 20,
+    gap: 5,
   },
   dateGroup: {
     flexDirection: 'row',
@@ -36,6 +38,7 @@ export const styles = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 1,
     height: 200,
+    padding: 30,
   },
   switch: {
     flexDirection: 'row',

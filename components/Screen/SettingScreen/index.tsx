@@ -1,7 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {
   Alert,
-  Image,
   Keyboard,
   Modal,
   Text,
@@ -15,6 +14,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 
 import {styles} from './styles';
 import {get_info, upload_info} from '../../../api/users';
+import {Input, ListItem, Image} from '@rneui/themed';
 
 type UserInfo = {
   name: string;
@@ -110,7 +110,14 @@ const SettingScreen = () => {
     <SafeAreaView>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.container}>
-          <View style={styles.header} />
+          <View style={styles.header}>
+            <Image
+              source={require('../../../assets/img/logo-white.png')}
+              style={{width: '100%', height: '100%'}}
+              resizeMode="repeat"
+            />
+          </View>
+          {/* <View style={styles.header} /> */}
 
           <View style={styles.image}>
             <Image
@@ -125,88 +132,76 @@ const SettingScreen = () => {
 
           <View style={styles.contentContainer}>
             <View style={styles.groupInfo}>
-              <View style={styles.groupRow}>
+              <ListItem bottomDivider>
                 <Icon name="envelope" size={20} color={'#000'} />
-                <Text style={styles.label}> Email:</Text>
-                <Text style={styles.text}>{userInfo?.email}</Text>
-              </View>
-              <View style={styles.groupRow}>
+                <ListItem.Content>
+                  <ListItem.Title>Email:</ListItem.Title>
+                  <ListItem.Subtitle>{userInfo?.email}</ListItem.Subtitle>
+                </ListItem.Content>
+              </ListItem>
+
+              <ListItem bottomDivider>
                 <Icon name="user" size={20} color={'#000'} />
-                <Text style={styles.label}> Tên:</Text>
-                <Text style={styles.text}>{userInfo?.name}</Text>
-              </View>
+                <ListItem.Content>
+                  <ListItem.Title>Tên:</ListItem.Title>
+                  <ListItem.Subtitle>{userInfo?.name}</ListItem.Subtitle>
+                </ListItem.Content>
+              </ListItem>
 
-              <View style={styles.groupRow}>
+              <ListItem bottomDivider>
                 <Icon name="briefcase" size={20} color={'#000'} />
-                <Text style={styles.label}> Chức vụ:</Text>
-                <Text style={styles.text}>{userInfo?.role.typeName}</Text>
-              </View>
+                <ListItem.Content>
+                  <ListItem.Title>Chức vụ:</ListItem.Title>
+                  <ListItem.Subtitle>
+                    {userInfo?.role.typeName}
+                  </ListItem.Subtitle>
+                </ListItem.Content>
+              </ListItem>
 
-              <View style={styles.groupRow}>
+              <ListItem bottomDivider>
                 <Icon name="id-card" size={20} color={'#000'} />
-                <Text style={styles.label}> CCCD:</Text>
-                <Text style={styles.text}>{userInfo?.CCCD}</Text>
-              </View>
+                <ListItem.Content>
+                  <ListItem.Title>CCCD:</ListItem.Title>
+                  <ListItem.Subtitle>{userInfo?.CCCD}</ListItem.Subtitle>
+                </ListItem.Content>
+              </ListItem>
 
               {!editPhoneOpen ? (
-                <View
-                  style={[styles.groupRow, {justifyContent: 'space-between'}]}>
-                  <View style={styles.groupChild}>
-                    <Icon name="phone" size={20} color={'#000'} />
-                    <Text style={styles.label}> Phone:</Text>
-                    <Text style={styles.text}>{userInfo?.phone}</Text>
-                  </View>
-
-                  <View style={styles.groupChild}>
-                    <TouchableOpacity onPress={handleEditPhone}>
-                      <Icon name="edit" size={20} color={'#000'} />
-                    </TouchableOpacity>
-                  </View>
-                </View>
+                <ListItem bottomDivider>
+                  <Icon name="phone" size={20} color={'#000'} />
+                  <ListItem.Content>
+                    <ListItem.Title>Phone:</ListItem.Title>
+                    <ListItem.Subtitle>{userInfo?.phone}</ListItem.Subtitle>
+                  </ListItem.Content>
+                  <ListItem.Chevron onPress={handleEditPhone} />
+                </ListItem>
               ) : (
-                <View
-                  style={[styles.groupRow, {justifyContent: 'space-between'}]}>
-                  <View style={styles.groupChild}>
-                    <Icon name="phone" size={20} color={'#000'} />
-                    <Text style={styles.label}> Phone:</Text>
-                    <TextInput
+                <ListItem bottomDivider>
+                  <Icon name="phone" size={20} color={'#000'} />
+                  <ListItem.Content>
+                    <ListItem.Title>Phone:</ListItem.Title>
+                    <Input
                       value={phone}
                       onChangeText={setPhone}
-                      style={styles.input}
                       keyboardType="numeric"
                       placeholder="Hãy nhập SDT 10 số"
                       maxLength={10}
                     />
-                  </View>
-
-                  <View style={styles.groupChild}>
-                    <TouchableOpacity onPress={handleUpdatePhone}>
-                      <Icon name="check" size={20} color={'#000'} />
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      onPress={() => setEditPhoneOpen(false)}
-                      style={{marginLeft: 20}}>
-                      <Icon name="close" size={20} color={'#000'} />
-                    </TouchableOpacity>
-                  </View>
-                </View>
+                  </ListItem.Content>
+                  <Icon
+                    name="check"
+                    size={20}
+                    color={'#000'}
+                    onPress={handleUpdatePhone}
+                  />
+                  <Icon
+                    name="close"
+                    size={20}
+                    color={'#000'}
+                    onPress={() => setEditPhoneOpen(false)}
+                  />
+                </ListItem>
               )}
-
-              <View style={styles.groupRow}>
-                <View style={styles.groupChild}>
-                  <Icon name="venus-mars" size={20} color={'#000'} />
-                  <Text style={styles.label}> Giới tính:</Text>
-                  <Text style={styles.text}>
-                    {userInfo?.sex ? 'Nam' : 'Nữ'}
-                  </Text>
-                </View>
-                <View style={[styles.groupChild, {marginLeft: 40}]}>
-                  <Icon name="clock-o" size={20} color={'#000'} />
-                  <Text style={styles.text}>
-                    {userInfo?.isPartTime ? 'Part Time' : 'Full Time'}
-                  </Text>
-                </View>
-              </View>
             </View>
 
             <View style={styles.buttonGroup}>
@@ -223,7 +218,6 @@ const SettingScreen = () => {
             </View>
           </View>
 
-          {/* {renderImageModal()} */}
           <Modal
             animationType="slide"
             transparent={true}

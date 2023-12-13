@@ -1,10 +1,10 @@
-import React, {useMemo, useState} from 'react';
+import React, {useState} from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {
+  Alert,
   Keyboard,
-  Switch,
   Text,
   TextInput,
   TouchableOpacity,
@@ -13,50 +13,98 @@ import {
 } from 'react-native';
 
 import {styles} from './styles';
-import {RadioGroup} from 'react-native-radio-buttons-group';
 import {useRoute} from '@react-navigation/native';
+import {getOldRequest, sendFormRequest} from '../../../api/users';
+import {BottomSheet, Button, ListItem} from '@rneui/themed';
+import {IForm} from '../../../types/interface';
+
+interface RouteParams {
+  daySelected: string;
+}
 
 const FormScreen = () => {
+  const [isVisible, setIsVisible] = useState(false);
+  const [oldRequest, setOldRequest] = useState<IForm[]>([]);
+
   let startDate = new Date();
-  if (useRoute().params) {
-    startDate = new Date(useRoute().params.daySelected);
+  const dayParam = useRoute().params as RouteParams;
+  if (dayParam) {
+    startDate = new Date(dayParam.daySelected);
   }
 
   const [endDate, setEndDate] = useState(startDate);
   const [showPicker, setShowPicker] = useState(false);
   const [reason, setReason] = useState('');
-  const [isEnabled, setIsEnabled] = useState(true);
-  const [selectedId, setSelectedId] = useState('');
-  const toggleSwitch = () => setIsEnabled(previousState => !previousState);
-
-  const radioButtons = useMemo(
-    () => [
-      {
-        id: '1', // acts as primary key, should be unique and non-empty string
-        label: 'Ca sáng',
-        value: 'morning',
-        labelStyle: {
-          color: 'red',
-        },
-        color: '#3E64FF',
-      },
-      {
-        id: '2',
-        label: 'Ca chiều',
-        value: 'afternoon',
-        labelStyle: {
-          color: 'red',
-        },
-        color: '#3E64FF',
-      },
-    ],
-    [],
-  );
 
   const onChange = (event: any, selectedDate: any) => {
     setShowPicker(false);
 
     setEndDate(selectedDate);
+  };
+
+  const handleSubmit = async () => {
+    // startDate, endDate, reason
+    if (reason.trim().length === 0) {
+      setReason('');
+      Alert.alert('Thông báo', 'Hãy nhập lý do nghỉ của bạn');
+      return;
+    }
+
+    const formData = {
+      startDate,
+      endDate,
+      reason,
+    };
+
+    const response = await sendFormRequest(formData);
+    const result = response?.data;
+    if (result.success) {
+      Alert.alert(
+        'Thông báo',
+        'Bạn đã gửi đơn xin nghỉ phép thành công!\nhãy đợi admin duyệt nhé!',
+      );
+    } else {
+      Alert.alert('Thông báo', 'Có lỗi xảy ra vui lòng thử lại sau!');
+    }
+  };
+
+  const openBottomSheet = async () => {
+    setIsVisible(true);
+
+    const response = await getOldRequest();
+    if (response?.data.success) {
+      setOldRequest(response.data.data);
+    } else {
+      Alert.alert('Thông báo', 'Có lỗi xảy ra vui lòng thử lại sau!');
+      setIsVisible(false);
+      return;
+    }
+  };
+
+  const renderBottomSheet = () => {
+    return (
+      <BottomSheet modalProps={{}} isVisible={isVisible}>
+        {oldRequest.map((l, i) => (
+          <ListItem key={i} containerStyle={{backgroundColor: 'white'}}>
+            <ListItem.Content>
+              <ListItem.Title style={{color: '#000'}}>
+                {`${new Date(l.startDate).toDateString()} - ${new Date(
+                  l.endDate,
+                ).toDateString()}`}
+              </ListItem.Title>
+              <ListItem.Subtitle>Trạng thái: {l.status}</ListItem.Subtitle>
+            </ListItem.Content>
+          </ListItem>
+        ))}
+        <ListItem
+          containerStyle={{backgroundColor: 'red'}}
+          onPress={() => setIsVisible(false)}>
+          <ListItem.Content>
+            <ListItem.Title style={{color: '#fff'}}>Cancel</ListItem.Title>
+          </ListItem.Content>
+        </ListItem>
+      </BottomSheet>
+    );
   };
 
   return (
@@ -107,32 +155,6 @@ const FormScreen = () => {
           </View>
 
           <View style={styles.wrapper}>
-            <View style={styles.shift}>
-              <View style={styles.switch}>
-                <Text style={styles.text}>Nghỉ cả ngày</Text>
-                <Switch
-                  style={styles.switchButton}
-                  trackColor={{false: '#767577', true: '#81b0ff'}}
-                  thumbColor={isEnabled ? '#f5dd4b' : '#f4f3f4'}
-                  ios_backgroundColor="#3e3e3e"
-                  onValueChange={toggleSwitch}
-                  value={isEnabled}
-                />
-              </View>
-              <View>
-                {!isEnabled && (
-                  <RadioGroup
-                    radioButtons={radioButtons}
-                    onPress={setSelectedId}
-                    selectedId={selectedId}
-                    layout="row"
-                  />
-                )}
-              </View>
-            </View>
-          </View>
-
-          <View style={styles.wrapper}>
             <Text style={styles.text}>Lí do:</Text>
             <TextInput
               style={styles.textInput}
@@ -146,11 +168,22 @@ const FormScreen = () => {
 
           <View style={styles.wrapper}>
             <View style={styles.button}>
-              <TouchableOpacity style={styles.submitButton}>
+              <Button
+                title="Xem lại các form"
+                onPress={() => openBottomSheet()}
+              />
+            </View>
+
+            <View style={styles.button}>
+              <TouchableOpacity
+                style={styles.submitButton}
+                onPress={handleSubmit}>
                 <Text style={styles.submitText}>Submit</Text>
               </TouchableOpacity>
             </View>
           </View>
+
+          {renderBottomSheet()}
         </LinearGradient>
       </TouchableWithoutFeedback>
     </SafeAreaView>

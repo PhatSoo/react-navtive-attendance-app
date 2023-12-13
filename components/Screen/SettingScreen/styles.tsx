@@ -4,12 +4,12 @@ export const styles = StyleSheet.create({
   container: {
     height: '100%',
     alignItems: 'center',
-    backgroundColor: '#BDF1F6',
+    backgroundColor: '#FFF',
     paddingBottom: 10,
   },
   header: {
-    backgroundColor: '#ECFCFF',
-    height: '10%',
+    // backgroundColor: '#ECFCFF',
+    height: '20%',
     width: '100%',
   },
   image: {
@@ -34,7 +34,8 @@ export const styles = StyleSheet.create({
   },
   groupInfo: {
     width: '100%',
-    paddingHorizontal: 20,
+    // paddingHorizontal: 20,
+    paddingVertical: 20,
   },
   groupRow: {
     flexDirection: 'row',
