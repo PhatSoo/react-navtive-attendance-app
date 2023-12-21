@@ -1,4 +1,4 @@
-import apiManager from '.';
+import {apiManager, apiManager2} from '.';
 
 type userLoginData = {
   email: string;
@@ -11,6 +11,7 @@ export const user_login = async (data: userLoginData) => {
 
     if (response.data.success) {
       apiManager.defaults.headers.common.Authorization = response.data.token;
+      apiManager2.defaults.headers.common.Authorization = response.data.token;
     }
 
     return response;
@@ -76,7 +77,7 @@ export const get_existing_shift = async (shiftId: string) => {
 
 export const check = async (formData: any) => {
   try {
-    return await apiManager.put('me/check', formData, {
+    return await apiManager2.put('api/check', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -108,5 +109,13 @@ export const get_time_of_fulltime = async () => {
     return res.data.data.workHours;
   } catch (error) {
     console.log(error);
+  }
+};
+
+export const check_local_wifi = async () => {
+  try {
+    return await apiManager2.get('/', {timeout: 5000});
+  } catch (error) {
+    return false;
   }
 };

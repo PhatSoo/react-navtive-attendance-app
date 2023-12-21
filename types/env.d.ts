@@ -1,6 +1,5 @@
 declare module '@env' {
   export const API: string;
-  export const AVATAR_PATH: string;
+  export const API2: string;
   export const JWT_PASS: string;
-  export const ATTENDANCE_PATH: string;
 }

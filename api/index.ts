@@ -1,12 +1,14 @@
 import axios from 'axios';
-import {API, ATTENDANCE_PATH} from '@env';
+import {API, API2} from '@env';
 
 console.log('====================================');
-console.log(API, ATTENDANCE_PATH);
+console.log('aloa', API, API2);
 console.log('====================================');
 
-const apiManager = axios.create({
+export const apiManager = axios.create({
   baseURL: `${API}`,
 });
 
-export default apiManager;
+export const apiManager2 = axios.create({
+  baseURL: `${API2}`,
+});

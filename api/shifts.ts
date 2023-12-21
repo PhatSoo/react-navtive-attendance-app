@@ -1,10 +1,10 @@
-import apiManager from '.';
-
 // type Shifts = {
 //   shiftName: string;
 //   startTime: number;
 //   endTime: number;
 // };
+
+import {apiManager} from '.';
 
 export const get_shift = async () => {
   try {

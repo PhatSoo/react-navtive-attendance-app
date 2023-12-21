@@ -26,7 +26,7 @@ const FormScreen = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [oldRequest, setOldRequest] = useState<IForm[]>([]);
 
-  let startDate = new Date();
+  let startDate = new Date(new Date().setDate(new Date().getDate() + 1));
   const dayParam = useRoute().params as RouteParams;
   if (dayParam) {
     startDate = new Date(dayParam.daySelected);

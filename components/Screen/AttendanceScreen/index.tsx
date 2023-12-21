@@ -13,12 +13,14 @@ import {RNCamera} from 'react-native-camera';
 import LottieView from 'lottie-react-native';
 import {
   check,
+  check_local_wifi,
   get_existing_shift,
   get_info,
   get_time_of_fulltime,
 } from '../../../api/users';
 import {get_current_shift} from '../../../api/shifts';
 import moment from 'moment';
+import Loading from '../../Modals/Loading';
 
 type Shift = {
   _id: string;
@@ -55,7 +57,8 @@ const Attendance = ({navigation}: any) => {
     data?: Attendance;
     message?: string;
   } | null>();
-  const [isPartTime, setIsPartTime] = useState(false);
+  const [isPartTime, setIsPartTime] = useState<boolean | null>(null);
+  const [checkNetwork, setCheckNetwork] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -67,9 +70,27 @@ const Attendance = ({navigation}: any) => {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    const check_wifi = async () => {
+      return await check_local_wifi().then(r => {
+        if (r) {
+          setCheckNetwork(true);
+        } else {
+          Alert.alert(
+            'Thông báo',
+            'Bạn hãy sử dụng wifi của công ty để sử dụng chức năng này nhé!',
+            [{text: 'OK', onPress: () => navigation.goBack()}],
+          );
+        }
+      });
+    };
+    check_wifi();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Get info about current shift
   useEffect(() => {
-    if (!checkType) {
+    if (!checkType && isPartTime !== null) {
       if (isPartTime) {
         const get_currentShift = async () => {
           const currentShift = await get_current_shift();
@@ -117,13 +138,13 @@ const Attendance = ({navigation}: any) => {
 
     try {
       const formData = new FormData();
+      formData.append('checkType', checkType);
+      formData.append('attendanceId', attendanceInfo?.data?._id);
       formData.append('image', {
         name: filename,
         uri,
         type: 'image/jpeg', // Loại ảnh bạn muốn gửi
       });
-      formData.append('checkType', checkType);
-      formData.append('attendanceId', attendanceInfo?.data?._id);
 
       const result = await check(formData);
 
@@ -132,6 +153,7 @@ const Attendance = ({navigation}: any) => {
         setIsCheckInOK(true);
         Alert.alert('Thông báo', 'Bạn đã chấm công thành công');
       } else {
+        setIsCheckInOK(false);
         Alert.alert('Thông báo', 'Bạn đã chấm công thất bại');
       }
     } catch (error) {
@@ -158,6 +180,26 @@ const Attendance = ({navigation}: any) => {
         } finally {
           setIsTakingPicture(false);
         }
+      }
+    }
+  };
+
+  const handleCheckPress = (cType: string) => {
+    if (attendanceInfo?.success && attendanceInfo.data) {
+      if (cType === 'CheckIn' && attendanceInfo.data.checkIn.time) {
+        Alert.alert(
+          'Thông báo',
+          `Bạn đã ${cType}\nVui lòng không chọn lại chức năng này!`,
+        );
+        return;
+      } else if (cType === 'CheckOut' && attendanceInfo.data.checkOut.time) {
+        Alert.alert(
+          'Thông báo',
+          `Bạn đã ${cType}\nVui lòng không chọn lại chức năng này!`,
+        );
+        return;
+      } else {
+        setCheckType(cType);
       }
     }
   };
@@ -215,26 +257,6 @@ const Attendance = ({navigation}: any) => {
         </View>
       </>
     );
-  };
-
-  const handleCheckPress = (cType: string) => {
-    if (attendanceInfo?.success && attendanceInfo.data) {
-      if (cType === 'CheckIn' && attendanceInfo.data.checkIn.time) {
-        Alert.alert(
-          'Thông báo',
-          `Bạn đã ${cType}\nVui lòng không chọn lại chức năng này!`,
-        );
-        return;
-      } else if (cType === 'CheckOut' && attendanceInfo.data.checkOut.time) {
-        Alert.alert(
-          'Thông báo',
-          `Bạn đã ${cType}\nVui lòng không chọn lại chức năng này!`,
-        );
-        return;
-      } else {
-        setCheckType(cType);
-      }
-    }
   };
 
   const renderCheckOptions = () => {
@@ -314,7 +336,7 @@ const Attendance = ({navigation}: any) => {
             <View style={styles.separator} />
 
             <View style={styles.bottom}>
-              {attendanceInfo?.success ? (
+              {attendanceInfo?.success && checkNetwork ? (
                 <>
                   <TouchableOpacity
                     style={styles.button}
@@ -358,6 +380,7 @@ const Attendance = ({navigation}: any) => {
   return (
     <LinearGradient colors={['#ECFCFF', '#B2FCFF']} style={styles.wrapper}>
       <View style={styles.container}>
+        {!checkNetwork && <Loading isLoading={!checkNetwork} />}
         {checkType ? renderCamera() : renderCheckOptions()}
       </View>
     </LinearGradient>
