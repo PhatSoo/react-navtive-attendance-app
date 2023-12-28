@@ -4,6 +4,10 @@ export const styles = StyleSheet.create({
   iconContainer: {
     marginRight: 10,
   },
+  textLoading: {
+    fontSize: 20,
+    color: '#FFFFFF',
+  },
   modalContainer: {
     flex: 1,
     justifyContent: 'center',

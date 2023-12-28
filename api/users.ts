@@ -21,6 +21,19 @@ export const user_login = async (data: userLoginData) => {
   }
 };
 
+export const user_logout = () => {
+  try {
+    delete apiManager.defaults.headers.common.Authorization;
+    delete apiManager2.defaults.headers.common.Authorization;
+    return true;
+  } catch (error) {
+    console.log('====================================');
+    console.log(error);
+    console.log('====================================');
+    return false;
+  }
+};
+
 export const get_info = async () => {
   return await apiManager.get('/me');
 };

@@ -1,5 +1,5 @@
 import React from 'react';
-import {ActivityIndicator, Modal, View} from 'react-native';
+import {ActivityIndicator, Modal, View, Text} from 'react-native';
 import {styles} from './styles';
 
 interface IProps {
@@ -12,6 +12,7 @@ const Loading: React.FC<IProps> = ({isLoading}) => {
       <Modal visible={isLoading} animationType="slide" transparent={true}>
         <View style={styles.modalContainer}>
           <ActivityIndicator size="large" color="#0000ff" />
+          <Text style={styles.textLoading}>Vui lòng đợi</Text>
         </View>
       </Modal>
     </>

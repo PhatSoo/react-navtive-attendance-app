@@ -4,7 +4,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 
 import {styles} from './styles';
 import LinearGradient from 'react-native-linear-gradient';
-import {get_info} from '../../../api/users';
+import {get_info, user_logout} from '../../../api/users';
 import {IEmployee} from '../../../types/interface';
 import {Avatar, Text} from '@rneui/themed';
 
@@ -24,6 +24,13 @@ const HomeScreen = ({navigation}: any) => {
     };
     fetchData();
   }, [userInfo]);
+
+  const handleLogout = async () => {
+    const logout = await user_logout();
+    if (logout) {
+      return navigation.replace('Login');
+    }
+  };
 
   return (
     <LinearGradient colors={['#ECFCFF', '#B2FCFF']} style={styles.container}>
@@ -83,9 +90,7 @@ const HomeScreen = ({navigation}: any) => {
           <Text style={styles.buttonText}>Thông tin nhân viên</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.logoutButton}
-          onPress={() => navigation.replace('Login')}>
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <Icon name="sign-out" size={30} color="#FFF" />
           <Text style={styles.logoutButtonText}>Logout</Text>
         </TouchableOpacity>

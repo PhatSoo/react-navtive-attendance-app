@@ -48,6 +48,7 @@ const Attendance = ({navigation}: any) => {
   const type = RNCamera.Constants.Type.front;
   let cameraRef = useRef<RNCamera>(null);
   const [loading, setLoading] = useState(true);
+  const [modalLoading, setModalLoading] = useState(false);
   const [isCheckInOK, setIsCheckInOK] = useState(false);
   const [isTakingPicture, setIsTakingPicture] = useState(false);
   const [checkType, setCheckType] = useState('');
@@ -149,6 +150,8 @@ const Attendance = ({navigation}: any) => {
       const result = await check(formData);
 
       setLoading(false);
+
+      setModalLoading(false);
       if (result?.data.success) {
         setIsCheckInOK(true);
         Alert.alert('Thông báo', 'Bạn đã chấm công thành công');
@@ -173,6 +176,7 @@ const Attendance = ({navigation}: any) => {
         };
         try {
           const data = await cameraRef.current.takePictureAsync(options);
+          setModalLoading(true);
 
           sendImage(data);
         } catch (error) {
@@ -203,6 +207,10 @@ const Attendance = ({navigation}: any) => {
       }
     }
   };
+
+  console.log('====================================');
+  console.log(modalLoading);
+  console.log('====================================');
 
   const renderCamera = () => {
     return (
@@ -255,6 +263,7 @@ const Attendance = ({navigation}: any) => {
             </TouchableOpacity>
           </View>
         </View>
+        {modalLoading && <Loading isLoading={modalLoading} />}
       </>
     );
   };

@@ -206,37 +206,50 @@ const ScheduleScreen = () => {
   };
 
   const handleConfirm = async () => {
+    let now = new Date();
+
+    // Tìm ngày Chủ nhật cùng tuần
+    let sunday = new Date(now);
+    sunday.setDate(now.getDate() - now.getDay() + 7);
+    sunday.setHours(10, 10, 0, 0);
+
     const formatDate = (dateStr: string) => {
       const [, date] = dateStr.split(', ');
       const [day, month, year] = date.split('/');
       return `${year}-${month}-${day}`;
     };
 
-    const groupedShifts: any[] = [];
-    for (const [date, shifts] of Object.entries(shiftsInfo)) {
-      if (shifts.length > 0) {
-        const formattedDate = formatDate(date);
-        const existingGroup = groupedShifts.find(
-          item => item.workDate === formattedDate,
-        );
-        if (existingGroup) {
-          existingGroup.workShift.push(...shifts);
-        } else {
-          groupedShifts.push({
-            workDate: formattedDate,
-            workShift: shifts,
-          });
+    // Kiểm tra xem now có <= 16h30 của ngày Chủ nhật cùng tuần không
+    if (now <= sunday) {
+      const groupedShifts: any[] = [];
+      for (const [date, shiftsRegis] of Object.entries(shiftsInfo)) {
+        if (shiftsRegis.length > 0) {
+          const formattedDate = formatDate(date);
+          const existingGroup = groupedShifts.find(
+            item => item.workDate === formattedDate,
+          );
+          if (existingGroup) {
+            existingGroup.workShift.push(...shiftsRegis);
+          } else {
+            groupedShifts.push({
+              workDate: formattedDate,
+              workShift: shiftsRegis,
+            });
+          }
         }
       }
+
+      const response = await schedule_chosen(groupedShifts);
+      if (response.data.success) {
+        Alert.alert('Thông báo', response.data.message);
+        setShiftSummaryModalVisible(false);
+        return;
+      }
+      Alert.alert('Có lỗi xảy ra', response.data.message);
+    } else {
+      Alert.alert('Có lỗi xảy ra', 'Đã hết giờ đăng ký ca làm!');
     }
 
-    const response = await schedule_chosen(groupedShifts);
-    if (response.data.success) {
-      Alert.alert('Thông báo', response.data.message);
-      setShiftSummaryModalVisible(false);
-      return;
-    }
-    Alert.alert('Có lỗi xảy ra', response.data.message);
     return;
   };
 
